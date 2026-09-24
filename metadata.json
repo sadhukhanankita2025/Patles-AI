@@ -1,0 +1,6 @@
+{
+  "name": "Patles.ai — AI Developer Platform",
+  "description": "Build websites and applications with AI in seconds. High-performance developer platform with code understanding, debugging, and project generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

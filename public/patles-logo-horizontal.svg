@@ -1,0 +1,160 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 80" width="1360" height="320">
+  <defs>
+    <!-- Left Petal: Hot Pink -> Rose Pink -> Soft Magenta (#FF5DAF -> #EC4899 -> #FF7CC8) -->
+    <linearGradient id="lh_pink" x1="15%" y1="5%" x2="85%" y2="95%">
+      <stop offset="0%" stop-color="#FF7CC8"/>
+      <stop offset="40%" stop-color="#FF5DAF"/>
+      <stop offset="80%" stop-color="#EC4899"/>
+      <stop offset="100%" stop-color="#BE185D"/>
+    </linearGradient>
+
+    <!-- Center Petal: Deep Violet -> Royal Purple -> Lavender Glow (#6D28D9 -> #8B5CF6 -> #C4B5FD) -->
+    <linearGradient id="lh_purple" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#C4B5FD"/>
+      <stop offset="35%" stop-color="#8B5CF6"/>
+      <stop offset="75%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#6D28D9"/>
+    </linearGradient>
+
+    <!-- Right Petal: Cyan -> Aqua -> Electric Blue (#06E7F2 -> #22D3EE -> #2563EB) -->
+    <linearGradient id="lh_cyan" x1="15%" y1="5%" x2="85%" y2="95%">
+      <stop offset="0%" stop-color="#06E7F2"/>
+      <stop offset="35%" stop-color="#22D3EE"/>
+      <stop offset="75%" stop-color="#0284C7"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+
+    <!-- Wordmark .ai Gradient -->
+    <linearGradient id="lh_ai" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="50%" stop-color="#818CF8"/>
+      <stop offset="100%" stop-color="#06E7F2"/>
+    </linearGradient>
+
+    <!-- Dual Glowing Orbital Rings -->
+    <linearGradient id="lh_ring_purple" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C4B5FD" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#8B5CF6" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="lh_ring_purple_back" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C4B5FD" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#8B5CF6" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.35"/>
+    </linearGradient>
+
+    <linearGradient id="lh_ring_cyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06E7F2" stop-opacity="0.95"/>
+      <stop offset="50%" stop-color="#22D3EE" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0.9"/>
+    </linearGradient>
+    <linearGradient id="lh_ring_cyan_back" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06E7F2" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#22D3EE" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#2563EB" stop-opacity="0.35"/>
+    </linearGradient>
+
+    <!-- Specular Highlight & Glass Rim -->
+    <linearGradient id="lh_spec" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#FFFFFF" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="lh_rim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="45%" stop-color="#E0E7FF" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#38BDF8" stop-opacity="0.25"/>
+    </linearGradient>
+
+    <!-- Inner AI Crystal Facet Gradients -->
+    <linearGradient id="lh_cfacet_l" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.95"/>
+      <stop offset="40%" stop-color="#C4B5FD" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#8B5CF6" stop-opacity="0.75"/>
+    </linearGradient>
+    <linearGradient id="lh_cfacet_r" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E9D5FF" stop-opacity="0.9"/>
+      <stop offset="50%" stop-color="#A855F7" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#6D28D9" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Soft Bloom Filter -->
+    <filter id="lh_glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="2.5" result="b1"/>
+      <feGaussianBlur stdDeviation="6" result="b2"/>
+      <feMerge>
+        <feMergeNode in="b2" opacity="0.4"/>
+        <feMergeNode in="b1" opacity="0.75"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 3-Petal Cosmic Crystal Lotus with Dual Rings and Inner AI Core -->
+  <g transform="translate(6, 4) scale(0.76)" filter="url(#lh_glow)">
+    <!-- Back of Ring 1 (Purple -22deg) -->
+    <g transform="rotate(-22 50 56)">
+      <path d="M 6 56 A 44 12 0 0 1 94 56" stroke="url(#lh_ring_purple_back)" stroke-width="1.2" stroke-dasharray="3.5 2" stroke-linecap="round" fill="none"/>
+    </g>
+    <!-- Back of Ring 2 (Cyan +24deg) -->
+    <g transform="rotate(24 50 56)">
+      <path d="M 6 56 A 44 12 0 0 1 94 56" stroke="url(#lh_ring_cyan_back)" stroke-width="1.2" stroke-dasharray="3.5 2" stroke-linecap="round" fill="none"/>
+    </g>
+
+    <!-- Left Petal: Hot Pink -> Rose Pink -> Soft Magenta -->
+    <g transform="translate(50, 84) rotate(-34) translate(-50, -84)">
+      <path d="M 48.5 24 C 49.3 23.1 50.7 23.1 51.5 24 C 55 28 62.5 43 62.5 59 C 62.5 73.5 55.5 82 50 84 C 44.5 82 37.5 73.5 37.5 59 C 37.5 43 45 28 48.5 24 Z" fill="url(#lh_pink)" fill-opacity="0.94"/>
+      <path d="M 48.5 24 C 49.3 23.1 50.7 23.1 51.5 24 C 55 28 62.5 43 62.5 59 C 62.5 73.5 55.5 82 50 84 C 44.5 82 37.5 73.5 37.5 59 C 37.5 43 45 28 48.5 24 Z" stroke="url(#lh_rim)" stroke-width="0.85" fill="none" opacity="0.65"/>
+      <path d="M 49.5 26 C 49.8 25.5 50.2 25.5 50.5 26 C 52.8 30 58 43 58 57 C 58 66 54 74 50 78" stroke="url(#lh_spec)" stroke-width="1.35" stroke-linecap="round" opacity="0.65" fill="none"/>
+    </g>
+
+    <!-- Right Petal: Cyan -> Aqua -> Electric Blue -->
+    <g transform="translate(50, 84) rotate(34) translate(-50, -84)">
+      <path d="M 48.5 24 C 49.3 23.1 50.7 23.1 51.5 24 C 55 28 62.5 43 62.5 59 C 62.5 73.5 55.5 82 50 84 C 44.5 82 37.5 73.5 37.5 59 C 37.5 43 45 28 48.5 24 Z" fill="url(#lh_cyan)" fill-opacity="0.94"/>
+      <path d="M 48.5 24 C 49.3 23.1 50.7 23.1 51.5 24 C 55 28 62.5 43 62.5 59 C 62.5 73.5 55.5 82 50 84 C 44.5 82 37.5 73.5 37.5 59 C 37.5 43 45 28 48.5 24 Z" stroke="url(#lh_rim)" stroke-width="0.85" fill="none" opacity="0.65"/>
+      <path d="M 49.5 26 C 49.8 25.5 50.2 25.5 50.5 26 C 52.8 30 58 43 58 57 C 58 66 54 74 50 78" stroke="url(#lh_spec)" stroke-width="1.35" stroke-linecap="round" opacity="0.65" fill="none"/>
+    </g>
+
+    <!-- Center Petal: Tallest (Royal Purple -> Lavender Glow) -->
+    <g>
+      <path d="M 48.2 15 C 49.2 14 50.8 14 51.8 15 C 55.8 19.5 64 36 64 54.5 C 64 71 56.5 81.5 50 84 C 43.5 81.5 36 71 36 54.5 C 36 36 44.2 19.5 48.2 15 Z" fill="url(#lh_purple)" fill-opacity="0.96"/>
+      <path d="M 48.2 15 C 49.2 14 50.8 14 51.8 15 C 55.8 19.5 64 36 64 54.5 C 64 71 56.5 81.5 50 84 C 43.5 81.5 36 71 36 54.5 C 36 36 44.2 19.5 48.2 15 Z" stroke="url(#lh_rim)" stroke-width="0.9" fill="none" opacity="0.75"/>
+      <path d="M 49.2 17 C 49.6 16.5 50.4 16.5 50.8 17 C 53.5 22 59.5 37 59.5 53 C 59.5 66 55 76 50 80" stroke="url(#lh_spec)" stroke-width="1.4" stroke-linecap="round" opacity="0.75" fill="none"/>
+
+      <!-- Inner AI Crystal Nucleus -->
+      <g opacity="0.95">
+        <polygon points="50,42 43.5,53.5 50,52" fill="url(#lh_cfacet_l)" opacity="0.88"/>
+        <polygon points="50,42 56.5,53.5 50,52" fill="url(#lh_cfacet_r)" opacity="0.95"/>
+        <polygon points="43.5,53.5 50,67 50,52" fill="#8B5CF6" opacity="0.8"/>
+        <polygon points="56.5,53.5 50,67 50,52" fill="#6D28D9" opacity="0.9"/>
+        <polygon points="50,42 56.5,53.5 50,67 43.5,53.5" stroke="#FFFFFF" stroke-width="0.85" stroke-linejoin="round" fill="none" opacity="0.85"/>
+        <circle cx="50" cy="53" r="2.4" fill="#FFFFFF" opacity="0.98"/>
+        <circle cx="50" cy="53" r="1.1" fill="#C4B5FD" opacity="0.9"/>
+      </g>
+    </g>
+
+    <!-- Front Arc of Ring 1 (Purple -22deg) -->
+    <g transform="rotate(-22 50 56)">
+      <path d="M 94 56 A 44 12 0 0 1 6 56" stroke="url(#lh_ring_purple)" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.95"/>
+      <circle cx="91" cy="54" r="1.7" fill="#C4B5FD" opacity="0.98"/>
+      <circle cx="91" cy="54" r="0.8" fill="#FFFFFF"/>
+      <circle cx="9" cy="58" r="1.5" fill="#FF5DAF" opacity="0.9"/>
+    </g>
+
+    <!-- Front Arc of Ring 2 (Cyan +24deg) -->
+    <g transform="rotate(24 50 56)">
+      <path d="M 94 56 A 44 12 0 0 1 6 56" stroke="url(#lh_ring_cyan)" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.95"/>
+      <circle cx="89" cy="58" r="1.7" fill="#06E7F2" opacity="0.98"/>
+      <circle cx="89" cy="58" r="0.8" fill="#FFFFFF"/>
+      <circle cx="11" cy="54" r="1.4" fill="#8B5CF6" opacity="0.9"/>
+    </g>
+
+    <!-- Confluence Seed -->
+    <circle cx="50" cy="83.5" r="2.2" fill="#FFFFFF" opacity="0.95"/>
+  </g>
+
+  <!-- Typography "Patles.ai" centered vertically on the right (sleeker and tighter to logo) -->
+  <text x="78" y="51" font-family="'Sora', 'Space Grotesk', 'Inter', -apple-system, sans-serif" font-size="28" font-weight="700" letter-spacing="-0.8">
+    <tspan fill="#FFFFFF">Patles</tspan><tspan fill="url(#lh_ai)">.ai</tspan>
+  </text>
+</svg>
