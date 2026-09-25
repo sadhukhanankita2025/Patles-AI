@@ -44,35 +44,22 @@ User Prompt → AI Generator → Workspace → AI Assistant
 - Persistent project storage
 
 ### 🤖 AI Assistant
-- Context-aware answers
-- Explains codebase structure
-- Clickable file references
+- Context-aware answers with file references
 
 ### 🔍 AI Code Review
-- Security checks (XSS, SQL Injection)
-- Performance optimization
-- Code quality analysis
+- Security + performance + best practices
 
 ### 🐞 AI Debugger
-- Stack trace analysis
-- Root-cause detection
-- One-click code fixes (diff view)
+- Root-cause detection + one-click fixes
 
 ### 🚀 Deployment Validator
-- Checks Vercel, Netlify, Docker configs
-- Environment validation
-- Readiness scoring
+- Config + env validation + readiness scoring
 
 ### 📄 Documentation Generator
-- README
-- API docs
-- Architecture diagrams
-- Deployment guides
+- README, API docs, architecture, deployment guide
 
 ### 🔗 GitHub Intelligence
-- Import repositories
-- Detect tech stack
-- Visual workflow graph
+- Repo import + workflow visualization
 
 ---
 
@@ -90,21 +77,91 @@ User Prompt → AI Generator → Workspace → AI Assistant
 
 ---
 
-## 📂 Project Structure
+## 📂 Full Project Structure
 
 
-src/
+.
+├── .env.example
+├── index.html
+├── metadata.json
+├── package.json
+├── server.ts
+├── tsconfig.json
+├── tsconfig.node.json
+├── vite.config.ts
+│
+├── public/
+│
+├── server/
+│ ├── db/
+│ │ ├── projectStore.ts
+│ │ ├── repositoryStore.ts
+│ │ └── schema.sql
+│ │
+│ ├── routes/
+│ │ ├── githubRoutes.ts
+│ │ └── projectRoutes.ts
+│ │
+│ └── services/
+│ ├── aiService.ts
+│ ├── githubService.ts
+│ ├── projectGeneratorService.ts
+│ ├── projectAnalysisService.ts
+│ └── workflowService.ts
+│
+└── src/
+├── App.tsx
+├── main.tsx
+├── index.css
+│
 ├── components/
-├── pages/
+│ ├── Navbar.tsx
+│ ├── Sidebar.tsx
+│ ├── Hero.tsx
+│ ├── Modal.tsx
+│ ├── Button.tsx
+│ ├── Input.tsx
+│ ├── LoadingSpinner.tsx
+│ ├── MetricsDashboard.tsx
+│ ├── VirtualTerminal.tsx
+│ │
+│ ├── github/
+│ │ ├── RepositoryExplorer.tsx
+│ │ ├── FileTree.tsx
+│ │ ├── CodeViewer.tsx
+│ │ ├── TechnologyStack.tsx
+│ │ └── file-analysis/
+│ │ ├── FileNetworkCanvas.tsx
+│ │ ├── FileMetricsTable.tsx
+│ │ └── FileTreemapView.tsx
+│ │
+│ └── workflow/
+│ ├── WorkflowHeader.tsx
+│ ├── WorkflowNodeComponent.tsx
+│ └── WorkflowToolbar.tsx
+│
 ├── context/
+│ └── ProjectContext.tsx
+│
 ├── data/
+│ └── mockData.ts
+│
 ├── layouts/
+│ ├── DashboardLayout.tsx
+│ └── MainLayout.tsx
+│
+├── pages/
+│ ├── LandingPage.tsx
+│ ├── DashboardPage.tsx
+│ ├── BuilderPage.tsx
+│ ├── WorkspacePage.tsx
+│ ├── WorkflowPage.tsx
+│ └── GitHubIntelligencePage.tsx
+│
 └── types/
-
-server/
-├── routes/
-├── services/
-└── db/
+├── index.ts
+├── github.ts
+└── workflow.ts
 
 
 ---
@@ -127,7 +184,7 @@ PORT=3000
 4️⃣ Run Dev Server
 npm run dev
 
-👉 Open: http://localhost:3000
+👉 http://localhost:3000
 
 5️⃣ Build Production
 npm run build
