@@ -9,10 +9,8 @@ import {
   Github,
   Workflow,
   User,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
-  LogOut,
   Plus
 } from 'lucide-react';
 import { PageView } from '../types';
@@ -46,22 +44,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
   ];
 
   return (
-    <aside 
+    <aside
       className={`h-screen sticky top-0 flex flex-col bg-[#0B1120] border-r border-slate-800/80 transition-all duration-300 z-30 ${
         isCollapsed ? 'w-20' : 'w-64'
       }`}
     >
-      {/* Brand Header */}
+      {/* Header */}
       <div className="h-20 px-3.5 flex items-center justify-between border-b border-slate-800/80">
         <button
           onClick={() => onNavigate('landing')}
-          className="flex items-center gap-2 overflow-hidden text-left focus:outline-none group p-1 transition-transform hover:scale-[1.02]"
+          className="flex items-center gap-2 overflow-hidden text-left group p-1 transition-transform hover:scale-[1.02]"
           title="Patles.ai"
         >
           {isCollapsed ? (
-            <PatlesLotusLogo variant="icon" size="sm" glow={true} animated={true} />
+            <PatlesLotusLogo variant="icon" size="sm" glow animated />
           ) : (
-            <PatlesLotusLogo variant="horizontal" size="sm" glow={true} animated={true} />
+            <PatlesLotusLogo variant="horizontal" size="sm" glow animated />
           )}
         </button>
 
@@ -70,15 +68,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
           className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isCollapsed ? (
+            <ChevronRight className="w-4 h-4" />
+          ) : (
+            <ChevronLeft className="w-4 h-4" />
+          )}
         </button>
       </div>
 
-      {/* Quick Action Button */}
+      {/* New Project Button */}
       <div className="p-3">
         <button
           onClick={onOpenNewProject}
-          className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-md shadow-purple-900/30 transition-all ${
+          className={`w-full flex items-center justify-center gap-2 p-2.5 rounded-xl 
+          bg-linear-to-r from-purple-600 to-indigo-600 
+          hover:from-purple-500 hover:to-indigo-500 
+          text-white text-xs font-semibold shadow-md shadow-purple-900/30 transition-all ${
             isCollapsed ? 'px-0' : 'px-3'
           }`}
           title="New AI Project"
@@ -88,27 +93,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
 
-      {/* Navigation List */}
+      {/* Navigation */}
       <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentPage === item.id || (item.id === 'github-import' && currentPage === 'github');
+          const isActive =
+            currentPage === item.id ||
+            (item.id === 'github-import' && currentPage === 'github');
 
           return (
             <button
               key={item.id}
               onClick={() => onNavigate(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all group relative ${
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all group ${
                 isActive
                   ? 'bg-purple-900/30 text-white border border-purple-500/40 shadow-sm'
                   : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/70'
               }`}
               title={isCollapsed ? item.label : undefined}
             >
-              <Icon className={`w-4 h-4 shrink-0 ${
-                isActive ? 'text-cyan-400' : 'text-slate-400 group-hover:text-slate-300'
-              }`} />
-              
+              <Icon
+                className={`w-4 h-4 shrink-0 ${
+                  isActive
+                    ? 'text-cyan-400'
+                    : 'text-slate-400 group-hover:text-slate-300'
+                }`}
+              />
+
               {!isCollapsed && (
                 <span className="truncate flex-1 text-left">
                   {item.label}
@@ -123,12 +134,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         })}
       </div>
 
-      {/* User Profile / Status Footer */}
+      {/* Footer */}
       <div className="p-3 border-t border-slate-800/80">
-        <div className={`flex items-center gap-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800 ${isCollapsed ? 'justify-center' : ''}`}>
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-sm">
+        <div
+          className={`flex items-center gap-3 p-2 rounded-xl bg-slate-900/60 border border-slate-800 ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
+        >
+          <div className="w-8 h-8 rounded-full bg-linear-to-tr from-purple-500 to-cyan-500 flex items-center justify-center font-bold text-white text-xs shrink-0 shadow-sm">
             P
           </div>
+
           {!isCollapsed && (
             <div className="truncate flex-1">
               <div className="text-xs font-semibold text-white truncate">

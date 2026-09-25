@@ -2,10 +2,10 @@ import React from 'react';
 import { PageView } from '../types';
 import { Button } from '../components/Button';
 import { GitHubIntelligencePage } from './GitHubIntelligencePage';
-import { 
-  FolderGit2, 
-  Server, 
-  FileCode2, 
+import {
+  FolderGit2,
+  Server,
+  FileCode2,
   User
 } from 'lucide-react';
 
@@ -138,7 +138,7 @@ export const SubModulesPage: React.FC<SubModulesPageProps> = ({
 
           <div className="p-6 rounded-3xl bg-[#0F172A]/80 border border-slate-800 space-y-6">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-bold text-white text-xl">
+              <div className="w-14 h-14 rounded-2xl bg-linear-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-bold text-white text-xl">
                 A
               </div>
               <div>

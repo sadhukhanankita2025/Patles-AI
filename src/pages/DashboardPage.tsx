@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { 
-  ANALYTICS_METRICS, 
-  RECENT_PROJECTS, 
-  RECENT_ACTIVITIES, 
-  AI_TIPS 
+import {
+  ANALYTICS_METRICS,
+  RECENT_PROJECTS,
+  RECENT_ACTIVITIES,
+  AI_TIPS
 } from '../data/mockData';
 import { AnalyticsCard } from '../components/AnalyticsCard';
 import { ActivityTimeline } from '../components/ActivityTimeline';
@@ -11,17 +11,17 @@ import { MetricsDashboard } from '../components/MetricsDashboard';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/Button';
 import { ProjectRecord, ActivityItem, PageView } from '../types';
-import { 
-  Sparkles, 
-  Plus, 
-  Github, 
+import {
+  Sparkles,
+  Plus,
+  Github,
   Workflow,
   Server,
-  Terminal, 
-  ExternalLink, 
-  Code2, 
-  Lightbulb, 
-  ChevronRight, 
+  Terminal,
+  ExternalLink,
+  Code2,
+  Lightbulb,
+  ChevronRight,
   ChevronLeft,
   ArrowRight,
   GitBranch,
@@ -58,8 +58,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   const filteredProjects = RECENT_PROJECTS.filter((p) => {
     const matchesCategory = projectFilter === 'all' || p.type === projectFilter;
-    const matchesSearch = p.name.toLowerCase().includes(searchFilter.toLowerCase()) || 
-                          p.description.toLowerCase().includes(searchFilter.toLowerCase());
+    const matchesSearch = p.name.toLowerCase().includes(searchFilter.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchFilter.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -78,9 +78,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
   return (
     <div className="space-y-8">
-      
+
       {/* 1. Welcome Card */}
-      <div className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-[#0F172A] border border-purple-500/30 shadow-2xl backdrop-blur-xl overflow-hidden">
+      <div className="relative p-6 sm:p-8 rounded-3xl bg-linear-to-r from-purple-950/40 via-indigo-950/30 to-[#0F172A] border border-purple-500/30 shadow-2xl backdrop-blur-xl overflow-hidden">
         {/* Ambient background glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -143,7 +143,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           Quick Actions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          
+
           <button
             onClick={onOpenNewProject}
             className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-purple-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
@@ -212,11 +212,11 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
       {/* 5. Split Section: Recent Projects Table & AI Activity Timeline + Tips */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
+
         {/* Left Side: Recent Projects Table (8 Cols) */}
         <div className="lg:col-span-8 space-y-4">
           <div className="p-6 rounded-3xl bg-[#0F172A]/80 border border-slate-800/90 shadow-2xl backdrop-blur-xl">
-            
+
             {/* Table Header & Controls */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
               <div>
@@ -245,11 +245,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                     <button
                       key={type}
                       onClick={() => setProjectFilter(type)}
-                      className={`px-2.5 py-1 rounded-lg capitalize transition-colors ${
-                        projectFilter === type
+                      className={`px-2.5 py-1 rounded-lg capitalize transition-colors ${projectFilter === type
                           ? 'bg-purple-600 text-white'
                           : 'text-slate-400 hover:text-white'
-                      }`}
+                        }`}
                     >
                       {type}
                     </button>
@@ -273,13 +272,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 text-xs">
                   {filteredProjects.map((proj) => (
-                    <tr 
+                    <tr
                       key={proj.id}
                       className="hover:bg-slate-900/60 transition-colors group cursor-pointer"
                       onClick={() => setSelectedProject(proj)}
                     >
                       <td className="py-3.5 px-2">
-                        <div className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate max-w-[180px]">
+                        <div className="font-semibold text-white group-hover:text-purple-300 transition-colors truncate max-w-45">
                           {proj.name}
                         </div>
                         <div className="text-[11px] text-slate-400 capitalize font-mono">
@@ -294,7 +293,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
                       <td className="py-3.5 px-2 font-mono text-slate-400">
                         <div className="flex items-center gap-1">
                           <GitBranch className="w-3 h-3 text-slate-500" />
-                          <span className="truncate max-w-[100px]">{proj.branch}</span>
+                          <span className="truncate max-w-25">{proj.branch}</span>
                         </div>
                       </td>
 
@@ -332,7 +331,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             {/* Table Footer */}
             <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
               <span>Showing {filteredProjects.length} projects</span>
-              <button 
+              <button
                 onClick={onOpenNewProject}
                 className="text-cyan-400 hover:underline flex items-center gap-1"
               >
@@ -346,7 +345,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
         {/* Right Side: Recent AI Activity Timeline + AI Tips Widget (4 Cols) */}
         <div className="lg:col-span-4 space-y-6">
-          
+
           {/* AI Activity Timeline */}
           <div className="p-6 rounded-3xl bg-[#0F172A]/80 border border-slate-800/90 shadow-2xl backdrop-blur-xl">
             <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-800">
@@ -366,13 +365,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </div>
 
           {/* AI Tips Widget */}
-          <div className="p-6 rounded-3xl bg-gradient-to-br from-indigo-950/40 via-purple-950/20 to-[#0F172A] border border-indigo-500/30 shadow-xl backdrop-blur-xl relative">
+          <div className="p-6 rounded-3xl bg-linear-to-br from-indigo-950/40 via-purple-950/20 to-[#0F172A] border border-indigo-500/30 shadow-xl backdrop-blur-xl relative">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2 text-xs font-mono text-amber-400">
                 <Lightbulb className="w-4 h-4" />
                 <span>AI Engineering Tip #{tipIndex + 1}</span>
               </div>
-              
+
               <div className="flex items-center gap-1">
                 <button
                   onClick={handlePrevTip}

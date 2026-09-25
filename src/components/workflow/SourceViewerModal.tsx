@@ -6,7 +6,8 @@ import {
   FileCode, 
   Loader2, 
   ExternalLink,
-  Code2
+  Code2,
+  Network
 } from 'lucide-react';
 import { Button } from '../Button';
 import Prism from 'prismjs';
@@ -22,12 +23,14 @@ interface SourceViewerModalProps {
   filePath: string | null;
   repositoryId: string;
   onClose: () => void;
+  onHighlightInWorkflow?: (filePath: string) => void;
 }
 
 export const SourceViewerModal: React.FC<SourceViewerModalProps> = ({
   filePath,
   repositoryId,
-  onClose
+  onClose,
+  onHighlightInWorkflow
 }) => {
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -117,6 +120,19 @@ export const SourceViewerModal: React.FC<SourceViewerModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
+            {onHighlightInWorkflow && filePath && (
+              <button
+                onClick={() => {
+                  onHighlightInWorkflow(filePath);
+                  onClose();
+                }}
+                className="px-2.5 py-1 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-cyan-900/30"
+              >
+                <Network className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Highlight Connection</span>
+              </button>
+            )}
+
             <Button
               variant="outline"
               size="sm"

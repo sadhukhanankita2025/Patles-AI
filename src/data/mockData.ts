@@ -1,12 +1,12 @@
-import { 
-  FeatureItem, 
-  TemplateItem, 
-  AnalyticsMetric, 
-  ProjectRecord, 
-  ActivityItem, 
+import {
+  FeatureItem,
+  TemplateItem,
+  AnalyticsMetric,
+  ProjectRecord,
+  ActivityItem,
   AITip,
   AIModel,
-  GeneratedProjectStructure 
+  GeneratedProjectStructure
 } from '../types';
 
 export const AI_MODELS: AIModel[] = [
@@ -376,7 +376,7 @@ export const AI_TIPS: AITip[] = [
 export function getSampleGeneratedProject(prompt: string, type: 'website' | 'mobile' | 'fullstack', model: string): GeneratedProjectStructure {
   const title = prompt.length > 30 ? prompt.substring(0, 30) + '...' : prompt || 'Generated Application';
   const pattern = type === 'fullstack' ? 'Event-Driven Microservices' : type === 'mobile' ? 'Mobile Backend-as-a-Service' : 'Edge-Accelerated Jamstack';
-  
+
   return {
     projectName: 'Patles-' + (prompt.split(' ')[0] || 'App').toLowerCase() + '-v1',
     projectType: type,
@@ -502,7 +502,7 @@ export default function ApplicationView() {
     <div className="min-h-screen bg-[#0B1120] text-slate-100 p-8">
       <header className="flex justify-between items-center pb-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg shadow-purple-500/20">
+          <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg shadow-purple-500/20">
             P
           </div>
           <div>
