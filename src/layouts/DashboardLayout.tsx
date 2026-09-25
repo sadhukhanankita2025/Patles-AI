@@ -39,18 +39,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return 'AI Project Generator';
       case 'workspace':
         return 'Repositories & Workspaces';
-      case 'ai-chat':
-        return 'AI Architecture Assistant';
-      case 'code-review':
-        return 'Security & Code Review';
-      case 'debugger':
-        return 'AI Debugger & Root Cause Analysis';
       case 'deployment':
         return 'CI/CD & Deployment Validator';
       case 'documentation':
         return 'Automated Documentation Hub';
       case 'github-import':
-        return 'GitHub Repository Importer';
+      case 'github':
+        return 'GitHub Intelligence';
+      case 'workflow':
+        return 'Architecture Workflow';
       case 'profile':
         return 'Developer Profile & Settings';
       default:
@@ -159,7 +156,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
 
             <button
-              onClick={() => onNavigate('ai-chat')}
               className="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors relative"
               title="Notifications"
             >

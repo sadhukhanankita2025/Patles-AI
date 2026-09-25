@@ -16,8 +16,7 @@ import {
   Plus, 
   Github, 
   Workflow,
-  ShieldCheck, 
-  Bug, 
+  Server,
   Terminal, 
   ExternalLink, 
   Code2, 
@@ -176,32 +175,32 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </button>
 
           <button
-            onClick={() => onNavigate('code-review')}
-            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-emerald-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
+            onClick={() => onNavigate('workflow')}
+            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-indigo-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <Workflow className="w-5 h-5 text-indigo-400" />
             </div>
-            <h3 className="text-sm font-bold text-white group-hover:text-emerald-200">
-              Run Code Review
+            <h3 className="text-sm font-bold text-white group-hover:text-indigo-200">
+              Architecture Workflow
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Scan pull requests for security and bugs
+              Explore interactive graph & system nodes
             </p>
           </button>
 
           <button
-            onClick={() => onNavigate('debugger')}
-            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-rose-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
+            onClick={() => onNavigate('deployment')}
+            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-blue-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <Bug className="w-5 h-5 text-rose-400" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <Server className="w-5 h-5 text-blue-400" />
             </div>
-            <h3 className="text-sm font-bold text-white group-hover:text-rose-200">
-              AI Debugger
+            <h3 className="text-sm font-bold text-white group-hover:text-blue-200">
+              Deployment Validator
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Paste stack trace for auto-remediation patch
+              Inspect build containers and cluster uptime
             </p>
           </button>
 

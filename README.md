@@ -171,14 +171,3 @@ The optimized client assets are served from `/dist` while all backend `/api/*` r
 
 ---
 
-## 📄 Contributing & License
-
-Contributions, bug reports, and feature proposals are welcome!
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-This project is licensed under the [MIT License](LICENSE).
