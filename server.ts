@@ -142,7 +142,7 @@ Synthesize complete architecture, system nodes, frontend code, backend endpoints
 
         // Try candidate models in order of stability
         const candidateModels = ['gemini-2.5-flash', 'gemini-3.8-flash'];
-        
+
         for (const candidateModel of candidateModels) {
           try {
             const response = await ai.models.generateContent({
@@ -304,8 +304,19 @@ Synthesize complete architecture, system nodes, frontend code, backend endpoints
     app.use(vite.middlewares);
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`> Patles.ai Server running at http://0.0.0.0:${PORT}`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`> Patles.ai Server running at http://localhost:${PORT}`);
+  });
+
+  server.on('error', (error: NodeJS.ErrnoException) => {
+    if (error.code === 'EADDRINUSE') {
+      console.error(`> Port ${PORT} is already in use.`);
+      console.error(`> Open the existing app at http://localhost:${PORT}`);
+      server.close(() => process.exit(0));
+      return;
+    }
+
+    throw error;
   });
 }
 
@@ -321,7 +332,7 @@ function generateDynamicProject(
   dialect: string
 ) {
   const pLower = prompt.toLowerCase();
-  
+
   // Extract keywords or domain
   const isEcommerce = pLower.includes('shop') || pLower.includes('store') || pLower.includes('cart') || pLower.includes('product') || pLower.includes('commerce');
   const isHealthcare = pLower.includes('health') || pLower.includes('patient') || pLower.includes('doctor') || pLower.includes('clinic') || pLower.includes('medical');
