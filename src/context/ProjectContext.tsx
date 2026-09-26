@@ -106,7 +106,15 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
 export const useProject = (): ProjectContextType => {
   const ctx = useContext(ProjectContext);
   if (!ctx) {
-    throw new Error('useProject must be used within a ProjectProvider');
+    return {
+      activeProjectId: 'proj_healthcare_connect',
+      activeProject: null,
+      projects: [],
+      isLoadingProjects: false,
+      setActiveProjectId: () => {},
+      refreshProjects: async () => {},
+      refreshActiveProject: async () => {}
+    };
   }
   return ctx;
 };

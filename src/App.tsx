@@ -4,6 +4,7 @@ import { MainLayout } from './layouts/MainLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { LandingPage } from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
+import { BuilderPage } from './pages/BuilderPage';
 import { PromptGeneratorPage } from './pages/PromptGeneratorPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SubModulesPage } from './pages/SubModulesPage';
@@ -16,7 +17,7 @@ export default function App() {
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [workflowRepoId, setWorkflowRepoId] = useState<string | undefined>(undefined);
 
-  // Sync with browser URL /github/:id/workflow
+  // Sync with browser URL /github/:id/workflow and /builder
   useEffect(() => {
     const handleLocationChange = () => {
       if (typeof window === 'undefined') return;
@@ -27,6 +28,8 @@ export default function App() {
         setCurrentPage('workflow');
       } else if (path === '/workflow') {
         setCurrentPage('workflow');
+      } else if (path === '/builder' || path === '/ai-builder') {
+        setCurrentPage('ai-builder');
       }
     };
 
@@ -37,6 +40,9 @@ export default function App() {
 
   const handleStartWithPrompt = (prompt: string) => {
     setSelectedPrompt(prompt);
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '/builder');
+    }
     setCurrentPage('ai-builder');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -54,14 +60,38 @@ export default function App() {
 
   const handleOpenNewProject = () => {
     setSelectedPrompt('');
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', '/builder');
+    }
     setCurrentPage('ai-builder');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // AI Builder full-page IDE experience (Cursor/Lovable/v0 style)
+  if (currentPage === 'ai-builder') {
+    return (
+      <BuilderPage
+        initialPrompt={selectedPrompt}
+        onNavigate={(page) => {
+          if (page === 'workflow' && workflowRepoId) {
+            window.history.pushState({}, '', `/github/${workflowRepoId}/workflow`);
+          } else if (page === 'workflow') {
+            window.history.pushState({}, '', '/workflow');
+          } else if (page === 'ai-builder') {
+            window.history.pushState({}, '', '/builder');
+          } else if (window.location.pathname.includes('/builder')) {
+            window.history.pushState({}, '', '/');
+          }
+          setCurrentPage(page);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+    );
+  }
+
   // Determine whether current page belongs to developer dashboard layout
   const isDashboardView = [
     'dashboard',
-    'ai-builder',
     'workspace',
     'deployment',
     'documentation',
@@ -98,15 +128,6 @@ export default function App() {
           />
         )}
 
-        {currentPage === 'ai-builder' && (
-          <PromptGeneratorPage
-            initialPrompt={selectedPrompt}
-            onOpenDeploy={(proj) => {
-              setCurrentPage('deployment');
-            }}
-          />
-        )}
-
         {(currentPage === 'github-import' || currentPage === 'github') && (
           <GitHubIntelligencePage
             onNavigate={(page) => {
@@ -131,7 +152,6 @@ export default function App() {
         )}
 
         {currentPage !== 'dashboard' && 
-         currentPage !== 'ai-builder' && 
          currentPage !== 'github-import' && 
          currentPage !== 'github' && 
          currentPage !== 'workflow' && (
