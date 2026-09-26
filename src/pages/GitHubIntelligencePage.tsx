@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PageView } from '../types';
 import { 
   GitHubRepoMetadata, 
@@ -259,7 +260,12 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
         </div>
       ) : (
         /* 2. Repository Intelligence Dashboard */
-        <div className="space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-6"
+        >
           
           {/* Top Bar with Switch Repo action */}
           <div className="flex items-center justify-between">
@@ -485,7 +491,7 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
 
           </div>
 
-        </div>
+        </motion.div>
       )}
 
     </div>

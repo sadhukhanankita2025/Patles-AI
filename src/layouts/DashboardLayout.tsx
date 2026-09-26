@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { PageView } from '../types';
-import {
-  Search,
-  Bell,
-  Sparkles,
-  Terminal,
-  HelpCircle,
+import { 
+  Search, 
+  Bell, 
+  Sparkles, 
+  Terminal, 
+  HelpCircle, 
   ChevronRight,
   Menu,
   X
 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { PatlesLotusLogo } from '../components/PatlesLotusLogo';
+import { ScrollProgressBar } from '../components/ScrollProgressBar';
+import { ScrollToTopButton } from '../components/ScrollToTopButton';
 
 interface DashboardLayoutProps {
   currentPage: PageView;
@@ -30,6 +32,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Automatically reset scroll position on sub-page transition
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
 
   const getPageTitle = (page: PageView) => {
     switch (page) {
@@ -57,7 +67,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
   return (
     <div className="min-h-screen flex bg-[#0B1120] text-slate-100">
-
+      
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
         <Sidebar
@@ -72,14 +82,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Mobile Drawer Overlay */}
       {mobileSidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden flex">
-          <div
-            className="fixed inset-0 bg-[#0B1120]/80 backdrop-blur-md"
-            onClick={() => setMobileSidebarOpen(false)}
+          <div 
+            className="fixed inset-0 bg-[#0B1120]/80 backdrop-blur-md" 
+            onClick={() => setMobileSidebarOpen(false)} 
           />
           <div className="relative z-10 w-64 bg-[#0B1120] border-r border-slate-800 h-full flex flex-col">
             <div className="p-4 flex items-center justify-between border-b border-slate-800">
               <PatlesLotusLogo variant="horizontal" size="sm" glow={true} animated={true} />
-              <button
+              <button 
                 onClick={() => setMobileSidebarOpen(false)}
                 className="p-1 rounded-lg text-slate-400 hover:text-white"
               >
@@ -93,7 +103,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 setMobileSidebarOpen(false);
               }}
               isCollapsed={false}
-              onToggleCollapse={() => { }}
+              onToggleCollapse={() => {}}
               onOpenNewProject={() => {
                 onOpenNewProject();
                 setMobileSidebarOpen(false);
@@ -104,11 +114,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
-
+      <div 
+        ref={contentRef}
+        className="flex-1 flex flex-col min-w-0 overflow-y-auto scroll-smooth relative"
+      >
+        {/* Scroll Progress Bar for Dashboard Workspace */}
+        <ScrollProgressBar containerRef={contentRef} />
+        
         {/* Top Header / Search Bar Contract */}
         <header className="sticky top-0 z-20 h-16 bg-[#0B1120]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
-
+          
           <div className="flex items-center gap-3">
             {/* Mobile toggle */}
             <button
@@ -121,14 +136,14 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
             {/* Breadcrumb Trail */}
             <div className="flex items-center gap-2 text-xs sm:text-sm font-medium">
-              <button
-                onClick={() => onNavigate('dashboard')}
+              <button 
+                onClick={() => onNavigate('dashboard')} 
                 className="text-slate-400 hover:text-white transition-colors"
               >
                 Console
               </button>
               <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-              <span className="text-white font-semibold truncate max-w-37.5 sm:max-w-none">
+              <span className="text-white font-semibold truncate max-w-[150px] sm:max-w-none">
                 {getPageTitle(currentPage)}
               </span>
             </div>
@@ -178,6 +193,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>
+
+        {/* Scroll To Top Button for Dashboard Viewport */}
+        <ScrollToTopButton containerRef={contentRef} threshold={220} />
       </div>
     </div>
   );

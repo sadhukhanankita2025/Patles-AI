@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Menu, X, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from './Button';
 import { PageView } from '../types';
@@ -16,6 +16,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navLinks = [
     { label: 'Home', page: 'landing' as PageView, href: '#' },
@@ -37,8 +47,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full backdrop-blur-xl bg-[#0B1120]/80 border-b border-slate-800/80 transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <header 
+      className={`sticky top-0 z-40 w-full transition-all duration-300 ${
+        isScrolled
+          ? 'backdrop-blur-2xl bg-[#060a16]/92 border-b border-purple-500/25 shadow-xl shadow-[#02040b]/70 py-0'
+          : 'backdrop-blur-md bg-[#0B1120]/70 border-b border-slate-800/80 py-0'
+      }`}
+    >
+      <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-all duration-300 ${
+        isScrolled ? 'h-16' : 'h-20'
+      }`}>
         
         {/* Zone 1: Official Patles.ai 3-Petal Lotus Brand Wordmark */}
         <button

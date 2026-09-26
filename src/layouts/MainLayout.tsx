@@ -2,6 +2,8 @@ import React from 'react';
 import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/Footer';
 import { CosmicPlexusBackground } from '../components/CosmicPlexusBackground';
+import { ScrollProgressBar } from '../components/ScrollProgressBar';
+import { ScrollToTopButton } from '../components/ScrollToTopButton';
 import { PageView } from '../types';
 
 interface MainLayoutProps {
@@ -19,6 +21,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 }) => {
   return (
     <div className="min-h-screen flex flex-col bg-[#050611] text-slate-100 selection:bg-purple-500/30 selection:text-purple-200 relative">
+      {/* Top Scroll Progress Bar */}
+      <ScrollProgressBar />
+
       {/* High-Tech Cosmic Plexus & Constellation Canvas */}
       <CosmicPlexusBackground />
 
@@ -35,7 +40,11 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
           onNavigate={onNavigate} 
         />
       </div>
+
+      {/* Floating Scroll To Top Button with Circular Progress Ring */}
+      <ScrollToTopButton threshold={260} />
     </div>
   );
 };
+
 

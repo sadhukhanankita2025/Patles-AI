@@ -209,7 +209,7 @@ export const BrowserPreview: React.FC<BrowserPreviewProps> = ({
       </div>
 
       {/* Rendered Live Website Preview */}
-      <div className="flex-1 bg-slate-950 rounded-b-2xl border-x border-b border-white/10 overflow-y-auto text-slate-100 font-sans shadow-2xl">
+      <div className="flex-1 bg-slate-950 rounded-b-2xl border-x border-b border-white/10 overflow-y-auto scroll-smooth text-slate-100 font-sans shadow-2xl">
         
         {/* ======================================================== */}
         {/* DOMAIN 1: FOOD DELIVERY APP */}

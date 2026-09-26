@@ -85,7 +85,7 @@ export const AIPromptPanel: React.FC<AIPromptPanelProps> = ({
   };
 
   return (
-    <div className="h-full flex flex-col space-y-5 overflow-y-auto pr-1">
+    <div className="h-full flex flex-col space-y-5 overflow-y-auto scroll-smooth pr-1">
       {/* Header section */}
       <div className="space-y-1.5">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/25 text-purple-300 text-xs font-mono">
