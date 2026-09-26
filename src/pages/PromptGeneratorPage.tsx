@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import JSZip from 'jszip';
-import { PromptEditor, ARCHITECTURE_PATTERNS, DATABASE_DIALECTS } from '../components/PromptEditor';
-import { ProjectType, AIModelId, GeneratedProjectStructure } from '../types';
-import { getSampleGeneratedProject, AI_MODELS, PROMPT_SUGGESTIONS } from '../data/mockData';
+import { PromptEditor } from '../components/PromptEditor';
+import { GeneratedProjectStructure } from '../types';
+import { getSampleGeneratedProject, PROMPT_SUGGESTIONS } from '../data/mockData';
 import { Button } from '../components/Button';
 import { ArchitectureVisualizer } from '../components/ArchitectureVisualizer';
 import { ApiPlayground } from '../components/ApiPlayground';
@@ -21,9 +21,12 @@ import {
   Terminal, 
   Network,
   MonitorPlay,
-  RotateCcw,
+  FileCode,
+  FolderGit2,
   CheckCircle2,
-  AlertCircle
+  Layers,
+  Search,
+  FileDown
 } from 'lucide-react';
 
 interface PromptGeneratorPageProps {
@@ -38,49 +41,45 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
   const [prompt, setPrompt] = useState(
     initialPrompt || PROMPT_SUGGESTIONS[0].prompt
   );
-  const [selectedModel, setSelectedModel] = useState<AIModelId>('gemini-3-8');
-  const [selectedType, setSelectedType] = useState<ProjectType>('fullstack');
-  const [selectedPattern, setSelectedPattern] = useState<string>('Event-Driven Microservices');
-  const [selectedDatabase, setSelectedDatabase] = useState<string>('PostgreSQL (Drizzle ORM)');
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationStep, setGenerationStep] = useState<string>('');
   const [generationProgress, setGenerationProgress] = useState(0);
 
-  // Active view tabs: 'architecture' | 'frontend' | 'backend' | 'database' | 'readme' | 'terminal'
-  const [activeTab, setActiveTab] = useState<'architecture' | 'frontend' | 'backend' | 'database' | 'readme' | 'terminal'>('architecture');
+  // Active view tabs: 'code' | 'architecture' | 'live-ui' | 'api' | 'terminal' | 'readme'
+  const [activeTab, setActiveTab] = useState<'code' | 'architecture' | 'live-ui' | 'api' | 'terminal' | 'readme'>('code');
+  const [selectedCodeFile, setSelectedCodeFile] = useState<string>('frontend');
   const [copied, setCopied] = useState(false);
-  const [frontendMode, setFrontendMode] = useState<'code' | 'interactive'>('interactive');
-  const [backendMode, setBackendMode] = useState<'code' | 'playground'>('code');
+  const [fileCopied, setFileCopied] = useState(false);
+  const [allCopied, setAllCopied] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
+  const [fileSearch, setFileSearch] = useState('');
   const [deployNotification, setDeployNotification] = useState<string | null>(null);
 
-  const currentModelObj = AI_MODELS.find(m => m.id === selectedModel) || AI_MODELS[0];
   const [generatedProject, setGeneratedProject] = useState<GeneratedProjectStructure>(() => 
-    getSampleGeneratedProject(prompt, selectedType, currentModelObj.name)
+    getSampleGeneratedProject(prompt, 'fullstack', 'Patles AI Engine')
   );
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     setGenerationProgress(15);
-    setGenerationStep('Analyzing semantic requirements & domain entities...');
+    setGenerationStep('Analyzing semantic prompt requirements & domain entities...');
 
     try {
-      // Step simulation indicators
       const timer1 = setTimeout(() => {
-        setGenerationProgress(40);
-        setGenerationStep(`Synthesizing ${selectedPattern} topology & node graph...`);
-      }, 500);
+        setGenerationProgress(45);
+        setGenerationStep('Synthesizing system architecture topology & node relationships...');
+      }, 400);
 
       const timer2 = setTimeout(() => {
-        setGenerationProgress(70);
-        setGenerationStep('Constructing typed React 19 views, Express routes & Drizzle schema...');
-      }, 1000);
+        setGenerationProgress(75);
+        setGenerationStep('Constructing typed React 19 UI, Express 5 API & database schemas...');
+      }, 800);
 
       const timer3 = setTimeout(() => {
-        setGenerationProgress(90);
-        setGenerationStep('Verifying zero-trust security boundaries & test manifests...');
-      }, 1500);
+        setGenerationProgress(92);
+        setGenerationStep('Verifying project integrity, packages & runnable scripts...');
+      }, 1200);
 
       // Call server generation proxy endpoint
       const response = await fetch('/api/generate-project', {
@@ -88,10 +87,7 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt,
-          projectType: selectedType,
-          modelId: currentModelObj.name,
-          architecturePattern: selectedPattern,
-          databaseDialect: selectedDatabase
+          projectType: 'fullstack'
         })
       });
 
@@ -103,13 +99,12 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
         const data = await response.json();
         setGeneratedProject(data);
       } else {
-        // Fallback to high-quality local generation if server route returns error
-        const fallbackProj = getSampleGeneratedProject(prompt, selectedType, currentModelObj.name);
+        const fallbackProj = getSampleGeneratedProject(prompt, 'fullstack', 'Patles AI Engine');
         setGeneratedProject(fallbackProj);
       }
     } catch (err) {
       console.warn('Network call failed, relying on local synthesis engine:', err);
-      const fallbackProj = getSampleGeneratedProject(prompt, selectedType, currentModelObj.name);
+      const fallbackProj = getSampleGeneratedProject(prompt, 'fullstack', 'Patles AI Engine');
       setGeneratedProject(fallbackProj);
     } finally {
       setGenerationProgress(100);
@@ -117,14 +112,146 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
       setTimeout(() => {
         setIsGenerating(false);
         setGenerationStep('');
-      }, 400);
+      }, 350);
     }
   };
 
+  // Structured code files of this particular project
+  const projectCodeFiles = useMemo(() => {
+    const slug = generatedProject.projectName.toLowerCase().replace(/[^a-z0-9]/g, '-');
+    const packageJsonStr = JSON.stringify({
+      name: slug,
+      version: '1.0.0',
+      private: true,
+      type: 'module',
+      scripts: {
+        dev: 'tsx src/server/index.ts',
+        build: 'vite build',
+        start: 'NODE_ENV=production node dist/server.js',
+        'db:push': 'drizzle-kit push'
+      },
+      dependencies: {
+        react: '^19.0.0',
+        'react-dom': '^19.0.0',
+        express: '^5.0.0',
+        zod: '^3.24.0',
+        'drizzle-orm': '^0.38.0',
+        'lucide-react': '^0.475.0',
+        cors: '^2.8.5'
+      },
+      devDependencies: {
+        typescript: '^5.7.0',
+        vite: '^6.1.0',
+        tsx: '^4.19.0',
+        tailwindcss: '^4.0.0',
+        'drizzle-kit': '^0.30.0'
+      }
+    }, null, 2);
+
+    const envStr = (generatedProject.readme.envVars || [
+      'PORT=3000',
+      'DATABASE_URL=postgresql://user:pass@localhost:5432/app_db',
+      'JWT_SECRET=super_secret_jwt_key_32_chars'
+    ]).join('\n');
+
+    return [
+      {
+        id: 'frontend',
+        path: generatedProject.frontend.mainFile || 'src/App.tsx',
+        label: 'App.tsx',
+        role: 'React 19 Frontend UI',
+        language: 'tsx',
+        code: generatedProject.frontend.sampleCode
+      },
+      {
+        id: 'backend',
+        path: 'src/server/routes.ts',
+        label: 'routes.ts',
+        role: 'Express 5 API Server',
+        language: 'ts',
+        code: generatedProject.backend.sampleCode
+      },
+      {
+        id: 'database',
+        path: 'src/db/schema.ts',
+        label: 'schema.ts',
+        role: 'Drizzle ORM Schema',
+        language: 'ts',
+        code: generatedProject.database.schemaCode
+      },
+      {
+        id: 'package',
+        path: 'package.json',
+        label: 'package.json',
+        role: 'Project Dependencies',
+        language: 'json',
+        code: packageJsonStr
+      },
+      {
+        id: 'readme',
+        path: 'README.md',
+        label: 'README.md',
+        role: 'Documentation & Setup',
+        language: 'markdown',
+        code: generatedProject.readme.overview
+      },
+      {
+        id: 'env',
+        path: '.env.example',
+        label: '.env.example',
+        role: 'Environment Config',
+        language: 'bash',
+        code: envStr
+      }
+    ];
+  }, [generatedProject]);
+
+  const filteredCodeFiles = useMemo(() => {
+    if (!fileSearch.trim()) return projectCodeFiles;
+    const query = fileSearch.toLowerCase();
+    return projectCodeFiles.filter(f => 
+      f.label.toLowerCase().includes(query) || 
+      f.path.toLowerCase().includes(query) ||
+      f.role.toLowerCase().includes(query)
+    );
+  }, [projectCodeFiles, fileSearch]);
+
+  const activeFile = filteredCodeFiles.find(f => f.id === selectedCodeFile) || filteredCodeFiles[0] || projectCodeFiles[0];
+
+  // Copy code helper
   const handleCopyCode = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyActiveFile = () => {
+    if (!activeFile) return;
+    navigator.clipboard.writeText(activeFile.code);
+    setFileCopied(true);
+    setTimeout(() => setFileCopied(false), 2000);
+  };
+
+  const handleCopyAllCode = () => {
+    const allCode = projectCodeFiles
+      .map(f => `// ==========================================\n// File: ${f.path} (${f.role})\n// ==========================================\n\n${f.code}`)
+      .join('\n\n\n');
+    navigator.clipboard.writeText(allCode);
+    setAllCopied(true);
+    setTimeout(() => setAllCopied(false), 2000);
+  };
+
+  const handleDownloadActiveFile = () => {
+    if (!activeFile) return;
+    const blob = new Blob([activeFile.code], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = activeFile.path.split('/').pop() || 'file.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   // Real .zip download using JSZip
@@ -133,61 +260,17 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
       const zip = new JSZip();
       const slug = generatedProject.projectName.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
-      // 1. package.json
-      const packageJson = {
-        name: slug,
-        version: '1.0.0',
-        private: true,
-        type: 'module',
-        scripts: {
-          dev: 'tsx src/server/index.ts',
-          build: 'vite build',
-          start: 'NODE_ENV=production node dist/server.js'
-        },
-        dependencies: {
-          react: '^19.0.0',
-          'react-dom': '^19.0.0',
-          express: '^5.0.0',
-          zod: '^3.23.0',
-          'drizzle-orm': '^0.35.0',
-          'lucide-react': '^0.450.0'
-        },
-        devDependencies: {
-          typescript: '^5.6.0',
-          vite: '^6.0.0',
-          tsx: '^4.19.0',
-          tailwindcss: '^4.0.0',
-          'drizzle-kit': '^0.26.0'
-        }
-      };
-      zip.file('package.json', JSON.stringify(packageJson, null, 2));
+      projectCodeFiles.forEach(file => {
+        zip.file(file.path, file.code);
+      });
 
-      // 2. README.md
-      zip.file('README.md', generatedProject.readme.overview);
-
-      // 3. Frontend code
-      zip.file('src/App.tsx', generatedProject.frontend.sampleCode);
-
-      // 4. Backend code
-      zip.file('src/server/routes.ts', generatedProject.backend.sampleCode);
-
-      // 5. Database Schema
-      zip.file('src/db/schema.ts', generatedProject.database.schemaCode);
-
-      // 6. Architecture & metadata
       zip.file('architecture.json', JSON.stringify(generatedProject.architecture, null, 2));
-      zip.file('.env.example', (generatedProject.readme.envVars || [
-        'PORT=3000',
-        'DATABASE_URL=postgresql://user:pass@localhost:5432/app_db',
-        'JWT_SECRET=super_secret_jwt_key_32_chars'
-      ]).join('\n'));
 
-      // Generate blob & trigger download
       const blob = await zip.generateAsync({ type: 'blob' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `${slug}-repo.zip`;
+      a.download = `${slug}-codebase.zip`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -196,7 +279,7 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
       setDownloadSuccess(true);
       setTimeout(() => setDownloadSuccess(false), 3000);
     } catch (err) {
-      console.error('Failed to bundle repository ZIP:', err);
+      console.error('Failed to generate .zip bundle', err);
     }
   };
 
@@ -209,18 +292,18 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
   };
 
   return (
-    <div className="space-y-8 font-sans">
+    <div className="space-y-6 font-sans pb-12">
       
       {/* Toast Notification */}
       {deployNotification && (
-        <div className="fixed top-6 right-6 z-50 px-4 py-2.5 rounded-2xl bg-slate-900 border border-purple-500 text-white text-xs font-mono shadow-2xl flex items-center gap-2">
+        <div className="fixed top-6 right-6 z-50 px-4 py-2.5 rounded-2xl bg-slate-900 border border-cyan-500 text-white text-xs font-mono shadow-2xl flex items-center gap-2">
           <div className="w-3.5 h-3.5 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
           <span>{deployNotification}</span>
         </div>
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800/80">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-slate-800/80">
         <div>
           <div className="inline-flex items-center gap-2 text-xs font-mono text-cyan-400 mb-1">
             <Sparkles className="w-3.5 h-3.5" />
@@ -230,23 +313,18 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
             AI Code & Architecture Generator
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Transform natural specifications into full-stack repositories with visual architecture graphs, typed components, API controllers, and SQL schemas.
+            Enter your prompt to synthesize complete full-stack source code, visual architecture, and runnable components.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-slate-300">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>{currentModelObj.name}</span>
-          </div>
-          
           <Button
             variant="outline"
             size="sm"
             onClick={() => handleCopyCode(JSON.stringify(generatedProject, null, 2))}
             leftIcon={copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
           >
-            {copied ? 'Copied Full Project JSON' : 'Export JSON'}
+            {copied ? 'Copied Project JSON' : 'Export JSON'}
           </Button>
 
           <Button
@@ -260,66 +338,55 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
         </div>
       </div>
 
-      {/* Main Split Layout: Left Prompt & Stack Controls (5 Cols) vs Right Generated Solution (7 Cols) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* TWO BLOCKS LAYOUT: Block 1 (Prompt Input) & Block 2 (Output & Codes) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
         
-        {/* Left Side: Prompt Editor & Controls */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* BLOCK 1: Take Prompt Block */}
+        <div className="lg:col-span-5 space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-cyan-400" />
+              1. Prompt Input
+            </span>
+            <span className="text-[11px] font-mono text-slate-500">Natural Language Specs</span>
+          </div>
+
           <PromptEditor
             prompt={prompt}
             onPromptChange={setPrompt}
-            selectedModel={selectedModel}
-            onModelChange={setSelectedModel}
-            selectedType={selectedType}
-            onTypeChange={setSelectedType}
-            selectedPattern={selectedPattern}
-            onPatternChange={setSelectedPattern}
-            selectedDatabase={selectedDatabase}
-            onDatabaseChange={setSelectedDatabase}
             onGenerate={handleGenerate}
             isGenerating={isGenerating}
           />
-
-          {/* Model Diagnostic Stats Card */}
-          <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800/80 text-xs text-slate-400 space-y-2 font-mono">
-            <div className="flex justify-between">
-              <span>Active Engine:</span>
-              <span className="text-slate-200 font-semibold">{currentModelObj.name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Context Capacity:</span>
-              <span className="text-cyan-400">{currentModelObj.contextWindow}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Generation Throughput:</span>
-              <span className="text-emerald-400">{currentModelObj.speed}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Zero-Trust Protocol:</span>
-              <span className="text-purple-300">mTLS & RLS Enforced</span>
-            </div>
-          </div>
         </div>
 
-        {/* Right Side: Generated Project Preview Panel */}
+        {/* BLOCK 2: Output & Project Code Block */}
         <div className="lg:col-span-7 space-y-4">
-          
+          <div className="flex items-center justify-between px-1">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              2. Synthesized Project Output & Code
+            </span>
+            <span className="text-[11px] font-mono text-slate-400 truncate max-w-[200px]" title={generatedProject.projectName}>
+              {generatedProject.projectName}
+            </span>
+          </div>
+
           {/* Generation Progress Indicator Overlay */}
           {isGenerating && (
-            <div className="p-5 rounded-3xl bg-purple-950/30 border border-purple-500/50 backdrop-blur-xl animate-pulse space-y-3">
+            <div className="p-5 rounded-3xl bg-cyan-950/30 border border-cyan-500/50 backdrop-blur-xl animate-pulse space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-4 h-4 rounded-full border-2 border-cyan-400 border-t-transparent animate-spin" />
                   <span className="text-sm font-semibold text-white">Synthesizing Code & Architecture...</span>
                 </div>
-                <span className="text-xs font-mono text-cyan-400">{generationProgress}%</span>
+                <span className="text-xs font-mono text-cyan-400 font-bold">{generationProgress}%</span>
               </div>
               <p className="text-xs text-cyan-300 font-mono">
                 {generationStep}
               </p>
               <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
                 <div 
-                  className="bg-gradient-to-r from-purple-500 to-cyan-400 h-full transition-all duration-300"
+                  className="bg-gradient-to-r from-cyan-500 to-purple-400 h-full transition-all duration-300"
                   style={{ width: `${generationProgress}%` }}
                 />
               </div>
@@ -329,144 +396,244 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
           {/* Main Solution Preview Container */}
           <div className="rounded-3xl bg-[#0F172A]/90 border border-slate-800/90 shadow-2xl overflow-hidden backdrop-blur-xl">
             
-            {/* Header / Tabs */}
-            <div className="p-3 bg-[#0B1120] border-b border-slate-800/90 flex flex-wrap items-center justify-between gap-3">
-              
-              {/* Primary Preview Tabs */}
-              <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-slate-900 border border-slate-800">
+            {/* Project Summary Banner */}
+            <div className="p-4 bg-[#0B1120] border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="p-2 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 shrink-0">
+                  <FolderGit2 className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-bold text-sm text-white truncate" title={generatedProject.projectName}>
+                      {generatedProject.projectName}
+                    </h3>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-800 uppercase shrink-0">
+                      Full Stack
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400 truncate max-w-md mt-0.5">
+                    {generatedProject.summary}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={handleCopyAllCode}
+                  className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer"
+                  title="Copy all project source files to clipboard"
+                >
+                  {allCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+                  <span>{allCopied ? 'Copied All Code' : 'Copy All Code'}</span>
+                </button>
+
+                <button
+                  onClick={handleDownloadZip}
+                  className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-cyan-900/40"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download .zip</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Primary View Tabs */}
+            <div className="p-2.5 bg-[#090e1c] border-b border-slate-800 flex items-center justify-between gap-2 overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-1.5">
                 
-                {/* 1. Architecture Tab */}
+                {/* 1. Project Code Tab (PRIMARY) */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('code')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                    activeTab === 'code'
+                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-md shadow-cyan-500/30'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Code2 className="w-3.5 h-3.5" />
+                  <span>Project Code</span>
+                </button>
+
+                {/* 2. Architecture Tab */}
                 <button
                   type="button"
                   onClick={() => setActiveTab('architecture')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
                     activeTab === 'architecture'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                      ? 'bg-purple-600 text-white font-bold shadow-md shadow-purple-900/40'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                   }`}
                 >
-                  <Network className="w-3.5 h-3.5 text-cyan-400" />
+                  <Network className="w-3.5 h-3.5 text-purple-400" />
                   <span>Architecture</span>
                 </button>
 
-                {/* 2. Frontend Tab */}
+                {/* 3. Live UI Tab */}
                 <button
                   type="button"
-                  onClick={() => setActiveTab('frontend')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                    activeTab === 'frontend'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                  onClick={() => setActiveTab('live-ui')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                    activeTab === 'live-ui'
+                      ? 'bg-emerald-600 text-white font-bold shadow-md shadow-emerald-900/40'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                   }`}
                 >
-                  <Code2 className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Frontend</span>
+                  <MonitorPlay className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Live UI</span>
                 </button>
 
-                {/* 3. Backend Tab */}
+                {/* 4. API Playground Tab */}
                 <button
                   type="button"
-                  onClick={() => setActiveTab('backend')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                    activeTab === 'backend'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Server className="w-3.5 h-3.5 text-purple-400" />
-                  <span>Backend</span>
-                </button>
-
-                {/* 4. Database Tab */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('database')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                    activeTab === 'database'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <Database className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Database</span>
-                </button>
-
-                {/* 5. README Tab */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('readme')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                    activeTab === 'readme'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  <FileText className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>README</span>
-                </button>
-
-                {/* 6. Terminal Tab */}
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('terminal')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                    activeTab === 'terminal'
-                      ? 'bg-purple-600 text-white shadow-sm'
-                      : 'text-slate-400 hover:text-white'
+                  onClick={() => setActiveTab('api')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                    activeTab === 'api'
+                      ? 'bg-amber-600 text-white font-bold shadow-md shadow-amber-900/40'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                   }`}
                 >
                   <Terminal className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Test API</span>
+                </button>
+
+                {/* 5. Terminal Tab */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('terminal')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                    activeTab === 'terminal'
+                      ? 'bg-indigo-600 text-white font-bold shadow-md shadow-indigo-900/40'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <Terminal className="w-3.5 h-3.5 text-indigo-400" />
                   <span>Terminal</span>
                 </button>
+
+                {/* 6. README Tab */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('readme')}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                    activeTab === 'readme'
+                      ? 'bg-slate-800 text-white font-bold border border-slate-700'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                  }`}
+                >
+                  <FileText className="w-3.5 h-3.5 text-slate-400" />
+                  <span>README</span>
+                </button>
+
               </div>
-
-              {/* Sub-view switches for Frontend & Backend */}
-              {activeTab === 'frontend' && (
-                <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
-                  <button
-                    onClick={() => setFrontendMode('interactive')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors flex items-center gap-1 cursor-pointer ${
-                      frontendMode === 'interactive' ? 'bg-slate-800 text-cyan-300' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <MonitorPlay className="w-3 h-3" />
-                    <span>Live UI</span>
-                  </button>
-                  <button
-                    onClick={() => setFrontendMode('code')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors cursor-pointer ${
-                      frontendMode === 'code' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Code
-                  </button>
-                </div>
-              )}
-
-              {activeTab === 'backend' && (
-                <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
-                  <button
-                    onClick={() => setBackendMode('code')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors cursor-pointer ${
-                      backendMode === 'code' ? 'bg-slate-800 text-white' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    Code
-                  </button>
-                  <button
-                    onClick={() => setBackendMode('playground')}
-                    className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-colors flex items-center gap-1 cursor-pointer ${
-                      backendMode === 'playground' ? 'bg-slate-800 text-purple-300' : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    <Terminal className="w-3 h-3" />
-                    <span>Test API</span>
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* TAB 1: ARCHITECTURE PREVIEW */}
+            {/* TAB 1: PROJECT CODE EXPLORER (SHOWS ALL CODES OF THIS PARTICULAR PROJECT) */}
+            {activeTab === 'code' && (
+              <div className="flex flex-col">
+                {/* File Selection Bar */}
+                <div className="p-2.5 bg-[#0B1120] border-b border-slate-800 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none flex-1 min-w-0">
+                    <span className="text-[10px] font-mono uppercase text-slate-500 font-bold px-1 shrink-0">
+                      Files ({filteredCodeFiles.length}):
+                    </span>
+                    {filteredCodeFiles.map(file => {
+                      const isSelected = activeFile?.id === file.id;
+                      return (
+                        <button
+                          key={file.id}
+                          type="button"
+                          onClick={() => setSelectedCodeFile(file.id)}
+                          className={`px-2.5 py-1.5 rounded-xl text-xs font-mono flex items-center gap-1.5 whitespace-nowrap transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-cyan-950 text-cyan-300 border border-cyan-500/60 font-semibold shadow-sm'
+                              : 'bg-slate-900/70 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800/80'
+                          }`}
+                        >
+                          <FileCode className={`w-3.5 h-3.5 ${isSelected ? 'text-cyan-400' : 'text-slate-500'}`} />
+                          <span>{file.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  <div className="relative shrink-0">
+                    <Search className="w-3.5 h-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={fileSearch}
+                      onChange={(e) => setFileSearch(e.target.value)}
+                      placeholder="Filter files..."
+                      className="pl-8 pr-2.5 py-1 text-xs font-mono bg-slate-900 border border-slate-800 rounded-lg text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 w-32 sm:w-36"
+                    />
+                  </div>
+                </div>
+
+                {/* Active File Header info */}
+                <div className="px-4 py-2.5 bg-[#0F172A] border-b border-slate-800/90 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-cyan-400 font-bold truncate">{activeFile.path}</span>
+                    <span className="text-slate-600">·</span>
+                    <span className="text-slate-400 text-[11px] px-2 py-0.5 rounded bg-slate-900 border border-slate-800">
+                      {activeFile.role}
+                    </span>
+                    <span className="text-slate-600 hidden sm:inline">·</span>
+                    <span className="text-slate-500 text-[11px] hidden sm:inline">
+                      {activeFile.code.split('\n').length} lines
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={handleCopyActiveFile}
+                      className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-[11px] transition-all flex items-center gap-1.5 cursor-pointer"
+                      title="Copy active file code"
+                    >
+                      {fileCopied ? (
+                        <>
+                          <Check className="w-3 h-3 text-emerald-400" />
+                          <span className="text-emerald-400">Copied</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3 h-3 text-slate-400" />
+                          <span>Copy File</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={handleDownloadActiveFile}
+                      className="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-[11px] transition-all flex items-center gap-1.5 cursor-pointer"
+                      title="Download active file"
+                    >
+                      <FileDown className="w-3 h-3 text-slate-400" />
+                      <span>Download</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Code Content with Line Numbers */}
+                <div className="p-4 bg-[#060a12] max-h-[520px] overflow-y-auto overflow-x-auto scrollbar-thin scrollbar-thumb-slate-800">
+                  <div className="flex font-mono text-xs leading-relaxed select-text">
+                    {/* Line numbers column */}
+                    <div className="pr-4 select-none text-slate-600 text-right font-mono border-r border-slate-800/80 shrink-0">
+                      {activeFile.code.split('\n').map((_, i) => (
+                        <div key={i}>{i + 1}</div>
+                      ))}
+                    </div>
+                    {/* Code text */}
+                    <div className="pl-4 overflow-x-auto flex-1 text-slate-200">
+                      <pre className="font-mono">
+                        <code>{activeFile.code}</code>
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: ARCHITECTURE PREVIEW */}
             {activeTab === 'architecture' && (
               <div className="p-4 sm:p-5">
                 <ArchitectureVisualizer
@@ -476,138 +643,42 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
               </div>
             )}
 
-            {/* TAB 2: FRONTEND PREVIEW */}
-            {activeTab === 'frontend' && (
-              <div>
-                {frontendMode === 'interactive' ? (
-                  <div className="p-4">
-                    <LiveUiSandbox project={generatedProject} />
-                  </div>
-                ) : (
-                  <div>
-                    <div className="px-4 py-2 bg-[#0F172A] border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
-                      <div className="flex items-center gap-2">
-                        <span className="text-cyan-400 font-semibold">{generatedProject.frontend.mainFile}</span>
-                        <span className="text-slate-600">·</span>
-                        <span>{generatedProject.frontend.framework}</span>
-                      </div>
-                      <button
-                        onClick={() => handleCopyCode(generatedProject.frontend.sampleCode)}
-                        className="hover:text-white flex items-center gap-1 cursor-pointer"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy Code</span>
-                      </button>
-                    </div>
-
-                    <div className="p-4 bg-[#0B1120] font-mono text-xs text-slate-200 overflow-x-auto max-h-[480px]">
-                      <pre className="leading-relaxed">
-                        <code>{generatedProject.frontend.sampleCode}</code>
-                      </pre>
-                    </div>
-                  </div>
-                )}
+            {/* TAB 3: LIVE UI PREVIEW */}
+            {activeTab === 'live-ui' && (
+              <div className="p-4">
+                <LiveUiSandbox project={generatedProject} />
               </div>
             )}
 
-            {/* TAB 3: BACKEND PREVIEW */}
-            {activeTab === 'backend' && (
-              <div>
-                {backendMode === 'playground' ? (
-                  <div className="p-4">
-                    <ApiPlayground
-                      endpoints={generatedProject.backend.endpoints}
-                      projectName={generatedProject.projectName}
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    <div className="px-4 py-2 bg-[#0F172A] border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
-                      <div className="flex items-center gap-2">
-                        <span className="text-purple-400 font-semibold">src/server/routes.ts</span>
-                        <span className="text-slate-600">·</span>
-                        <span>{generatedProject.backend.runtime}</span>
-                      </div>
-                      <button
-                        onClick={() => handleCopyCode(generatedProject.backend.sampleCode)}
-                        className="hover:text-white flex items-center gap-1 cursor-pointer"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        <span>Copy Code</span>
-                      </button>
-                    </div>
-
-                    <div className="p-4 bg-[#0B1120] font-mono text-xs text-slate-200 overflow-x-auto max-h-[480px]">
-                      {/* Endpoints Quick Index */}
-                      <div className="mb-4 p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 font-sans">
-                        <div className="text-xs font-bold text-white mb-2">Synthesized API Endpoints</div>
-                        {generatedProject.backend.endpoints.map((ep, i) => (
-                          <div key={i} className="flex items-center justify-between text-xs py-1 border-b border-slate-800/60 font-mono">
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                                ep.method === 'GET' ? 'bg-cyan-500/20 text-cyan-400' : 'bg-purple-500/20 text-purple-400'
-                              }`}>
-                                {ep.method}
-                              </span>
-                              <span className="text-slate-200">{ep.path}</span>
-                            </div>
-                            <span className="text-slate-400 text-[11px] font-sans truncate max-w-[240px]">{ep.desc}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <pre className="leading-relaxed">
-                        <code>{generatedProject.backend.sampleCode}</code>
-                      </pre>
-                    </div>
-                  </div>
-                )}
+            {/* TAB 4: API PLAYGROUND */}
+            {activeTab === 'api' && (
+              <div className="p-4">
+                <ApiPlayground
+                  endpoints={generatedProject.backend.endpoints}
+                  projectName={generatedProject.projectName}
+                />
               </div>
             )}
 
-            {/* TAB 4: DATABASE PREVIEW */}
-            {activeTab === 'database' && (
-              <div>
-                <div className="px-4 py-2 bg-[#0F172A] border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
-                  <div className="flex items-center gap-2">
-                    <span className="text-emerald-400 font-semibold">src/db/schema.ts</span>
-                    <span className="text-slate-600">·</span>
-                    <span>{generatedProject.database.dialect}</span>
-                  </div>
-                  <button
-                    onClick={() => handleCopyCode(generatedProject.database.schemaCode)}
-                    className="hover:text-white flex items-center gap-1 cursor-pointer"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                    <span>Copy Schema</span>
-                  </button>
-                </div>
-
-                <div className="p-4 bg-[#0B1120] font-mono text-xs text-slate-200 overflow-x-auto max-h-[480px]">
-                  <div className="mb-4 flex flex-wrap gap-2 font-sans">
-                    <span className="text-xs text-slate-400">Synthesized Tables:</span>
-                    {generatedProject.database.tables.map((t) => (
-                      <span key={t} className="px-2.5 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-
-                  <pre className="leading-relaxed">
-                    <code>{generatedProject.database.schemaCode}</code>
-                  </pre>
-                </div>
+            {/* TAB 5: TERMINAL PREVIEW */}
+            {activeTab === 'terminal' && (
+              <div className="p-4">
+                <VirtualTerminal
+                  projectName={generatedProject.projectName}
+                  installCmd={generatedProject.readme.installCmd}
+                  runCmd={generatedProject.readme.runCmd}
+                />
               </div>
             )}
 
-            {/* TAB 5: README PREVIEW */}
+            {/* TAB 6: README PREVIEW */}
             {activeTab === 'readme' && (
               <div>
-                <div className="px-4 py-2 bg-[#0F172A] border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
+                <div className="px-4 py-2.5 bg-[#0F172A] border-b border-slate-800 flex items-center justify-between text-xs text-slate-400 font-mono">
                   <div className="flex items-center gap-2">
-                    <span className="text-indigo-400 font-semibold">README.md</span>
+                    <span className="text-cyan-400 font-semibold">README.md</span>
                     <span className="text-slate-600">·</span>
-                    <span>Project Documentation</span>
+                    <span>Project Documentation & Architecture</span>
                   </div>
                   <button
                     onClick={() => handleCopyCode(generatedProject.readme.overview)}
@@ -618,7 +689,7 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
                   </button>
                 </div>
 
-                <div className="p-6 bg-[#0B1120] text-xs text-slate-300 space-y-4 max-h-[480px] overflow-y-auto">
+                <div className="p-6 bg-[#0B1120] text-xs text-slate-300 space-y-4 max-h-[500px] overflow-y-auto">
                   <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 font-mono text-xs whitespace-pre-wrap leading-relaxed">
                     {generatedProject.readme.overview}
                   </div>
@@ -646,25 +717,23 @@ export const PromptGeneratorPage: React.FC<PromptGeneratorPageProps> = ({
               </div>
             )}
 
-            {/* TAB 6: TERMINAL PREVIEW */}
-            {activeTab === 'terminal' && (
-              <div className="p-4">
-                <VirtualTerminal
-                  projectName={generatedProject.projectName}
-                  installCmd={generatedProject.readme.installCmd}
-                  runCmd={generatedProject.readme.runCmd}
-                />
-              </div>
-            )}
-
-            {/* Bottom Solution Actions Footer */}
+            {/* Solution Actions Footer */}
             <div className="p-4 bg-[#0F172A] border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
-                <span>Files synthesized: {generatedProject.frontend.fileCount} · Architecture: {generatedProject.architecture?.pattern || 'Microservices'}</span>
+                <span>Files synthesized: {projectCodeFiles.length} · Architecture: {generatedProject.architecture?.pattern || 'Microservices'}</span>
               </div>
 
               <div className="flex items-center gap-2.5">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCopyAllCode}
+                  leftIcon={allCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-slate-400" />}
+                >
+                  {allCopied ? 'Copied All Code' : 'Copy All Code'}
+                </Button>
+
                 <Button
                   variant="outline"
                   size="sm"
