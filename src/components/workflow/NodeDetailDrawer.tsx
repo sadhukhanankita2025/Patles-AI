@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
-import {
-  X,
-  FileCode,
-  Terminal,
-  Database,
-  Layers,
-  Sparkles,
-  ExternalLink,
-  Copy,
-  Check,
-  ArrowRight,
+import { 
+  X, 
+  FileCode, 
+  Terminal, 
+  Database, 
+  Layers, 
+  Sparkles, 
+  ExternalLink, 
+  Copy, 
+  Check, 
+  ArrowRight, 
   ArrowLeft,
-  ShieldCheck,
-  Cpu,
-  Route,
-  Loader2,
+  ShieldCheck, 
+  Cpu, 
+  Route, 
+  Loader2, 
   HardDrive,
   Code2,
   Table,
@@ -78,8 +78,8 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-110 bg-[#070b16]/95 backdrop-blur-2xl border-l border-slate-800 shadow-2xl z-40 flex flex-col transition-all duration-300 animate-in slide-in-from-right">
-
+    <div className="fixed inset-y-0 right-0 w-full sm:w-[440px] bg-[#070b16]/95 backdrop-blur-2xl border-l border-slate-800 shadow-2xl z-40 flex flex-col transition-all duration-300 animate-in slide-in-from-right">
+      
       {/* Drawer Header */}
       <div className="p-5 border-b border-slate-800/90 flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
@@ -115,37 +115,41 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
       <div className="flex items-center border-b border-slate-800 px-4 bg-[#050812]">
         <button
           onClick={() => setActiveTab('overview')}
-          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${activeTab === 'overview'
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${
+            activeTab === 'overview'
               ? 'border-cyan-400 text-cyan-300 font-semibold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
+          }`}
         >
           Overview
         </button>
         <button
           onClick={() => setActiveTab('source')}
-          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${activeTab === 'source'
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${
+            activeTab === 'source'
               ? 'border-cyan-400 text-cyan-300 font-semibold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
+          }`}
         >
           Source & API
         </button>
         <button
           onClick={() => setActiveTab('schema')}
-          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${activeTab === 'schema'
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${
+            activeTab === 'schema'
               ? 'border-cyan-400 text-cyan-300 font-semibold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
+          }`}
         >
           Contracts
         </button>
         <button
           onClick={() => setActiveTab('ai')}
-          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === 'ai'
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+            activeTab === 'ai'
               ? 'border-purple-400 text-purple-300 font-semibold'
               : 'border-transparent text-slate-400 hover:text-slate-200'
-            }`}
+          }`}
         >
           <Sparkles className="w-3 h-3 text-purple-400" />
           <span>AI Analysis</span>
@@ -154,7 +158,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
 
       {/* Drawer Body */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-thin scrollbar-thumb-slate-800 text-xs font-mono">
-
+        
         {/* TAB 1: OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-5">
@@ -370,7 +374,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
               <div className="space-y-1.5">
                 <span className="text-[10px] text-slate-500 uppercase tracking-wider">Example cURL Request</span>
                 <pre className="p-3 rounded-xl bg-black/60 border border-slate-800 text-[10px] text-slate-300 overflow-x-auto">
-                  {`curl -X ${data.method || 'GET'} \\
+{`curl -X ${data.method || 'GET'} \\
   'http://localhost:3000${data.endpoint.replace(/^[A-Z]+\s+/, '')}' \\
   -H 'Content-Type: application/json'`}
                 </pre>
@@ -388,7 +392,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
                 Security & Authorization Contract
               </span>
               <p className="text-slate-300 text-xs font-sans leading-relaxed">
-                {data.category === 'auth'
+                {data.category === 'auth' 
                   ? 'Guarded by session token / Bearer JWT headers. CSRF validated.'
                   : 'Accessible to authenticated internal services with standard project scope.'}
               </p>
@@ -429,7 +433,7 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
               <button
                 onClick={handleExplain}
                 disabled={isExplaining}
-                className="w-full py-2.5 rounded-xl bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-900/40"
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-900/40"
               >
                 {isExplaining ? (
                   <>

@@ -1,11 +1,11 @@
 import React from 'react';
-import {
-  Layers,
-  Server,
-  Terminal,
-  Database,
-  ShieldCheck,
-  Route,
+import { 
+  Layers, 
+  Server, 
+  Terminal, 
+  Database, 
+  ShieldCheck, 
+  Route, 
   Sparkles,
   Search,
   X,
@@ -75,47 +75,47 @@ export const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
   onAutoLayout
 }) => {
   const tabs: TabItem[] = [
-    {
-      id: 'overview',
-      label: 'All Architecture',
-      icon: Sparkles,
-      count: Object.values(categoriesCount).reduce((a, b) => a + b, 0)
+    { 
+      id: 'overview', 
+      label: 'All Architecture', 
+      icon: Sparkles, 
+      count: Object.values(categoriesCount).reduce((a, b) => a + b, 0) 
     },
-    {
-      id: 'frontend',
-      label: 'Frontend UI',
-      icon: Layers,
-      count: categoriesCount.frontend
+    { 
+      id: 'frontend', 
+      label: 'Frontend UI', 
+      icon: Layers, 
+      count: categoriesCount.frontend 
     },
-    {
-      id: 'api',
-      label: 'API Gateway',
-      icon: Terminal,
-      count: categoriesCount.api
+    { 
+      id: 'api', 
+      label: 'API Gateway', 
+      icon: Terminal, 
+      count: categoriesCount.api 
     },
-    {
-      id: 'backend',
-      label: 'Backend Logic',
-      icon: Server,
-      count: categoriesCount.backend
+    { 
+      id: 'backend', 
+      label: 'Backend Logic', 
+      icon: Server, 
+      count: categoriesCount.backend 
     },
-    {
-      id: 'database',
-      label: 'Database & Schemas',
-      icon: Database,
-      count: (categoriesCount.database || 0) + (categoriesCount.table || 0)
+    { 
+      id: 'database', 
+      label: 'Database & Schemas', 
+      icon: Database, 
+      count: (categoriesCount.database || 0) + (categoriesCount.table || 0) 
     },
-    {
-      id: 'auth',
-      label: 'Auth Boundary',
-      icon: ShieldCheck,
-      count: categoriesCount.auth
+    { 
+      id: 'auth', 
+      label: 'Auth Boundary', 
+      icon: ShieldCheck, 
+      count: categoriesCount.auth 
     },
-    {
-      id: 'journey',
-      label: 'Pipeline Journey',
-      icon: Route,
-      count: categoriesCount.journey
+    { 
+      id: 'journey', 
+      label: 'Pipeline Journey', 
+      icon: Route, 
+      count: categoriesCount.journey 
     },
   ];
 
@@ -131,20 +131,22 @@ export const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
             <button
               key={tab.id}
               onClick={() => onSelectTab(tab.id)}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono whitespace-nowrap transition-all duration-200 cursor-pointer ${isActive
-                  ? 'bg-linear-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white font-semibold shadow-lg shadow-purple-900/30'
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-mono whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                isActive
+                  ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white font-semibold shadow-lg shadow-purple-900/30'
                   : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-                }`}
+              }`}
             >
               <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-cyan-200' : 'text-slate-400'}`} />
               <span>{tab.label}</span>
 
               {tab.count !== undefined && tab.count > 0 && (
                 <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${isActive
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+                    isActive
                       ? 'bg-white/20 text-white'
                       : 'bg-slate-900 text-slate-400 border border-slate-800'
-                    }`}
+                  }`}
                 >
                   {tab.count}
                 </span>
@@ -156,7 +158,7 @@ export const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
 
       {/* Control Bar: Search + Simulation + Clusters + Direction + Zoom Controls */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-2 bg-[#080d1a]/85 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-xl">
-
+        
         {/* Search Input */}
         <div className="relative flex-1 max-w-md">
           <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -193,15 +195,16 @@ export const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
 
         {/* Action Buttons: Trace Connections, Simulation, Clusters, Layout & View */}
         <div className="flex items-center flex-wrap gap-1.5 self-end sm:self-auto">
-
+          
           {/* Trace File Connections Button */}
           {onOpenTraceModal && (
             <button
               onClick={onOpenTraceModal}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${hasActiveFileConnection
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+                hasActiveFileConnection
                   ? 'bg-cyan-500 text-slate-950 font-bold shadow-lg shadow-cyan-500/30'
                   : 'bg-cyan-950/40 hover:bg-cyan-900/60 text-cyan-300 border border-cyan-500/30'
-                }`}
+              }`}
               title="Search and trace all upstream callers & downstream dependencies of any file"
             >
               <Network className="w-3.5 h-3.5 text-cyan-400" />
@@ -224,10 +227,11 @@ export const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
           {/* Flow Simulator Toggle */}
           <button
             onClick={onToggleSimulation}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${isSimulating
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+              isSimulating
                 ? 'bg-emerald-500 text-slate-950 font-bold shadow-lg shadow-emerald-500/30'
                 : 'bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border border-emerald-500/30'
-              }`}
+            }`}
             title="Simulate end-to-end request pipelines through architecture"
           >
             <Zap className={`w-3.5 h-3.5 ${isSimulating ? 'animate-bounce' : 'text-emerald-400'}`} />
@@ -237,10 +241,11 @@ export const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
           {/* Cluster Hulls Toggle */}
           <button
             onClick={onToggleClusters}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${showClusters
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
+              showClusters
                 ? 'bg-purple-600/30 text-purple-300 border border-purple-500/50 shadow-md shadow-purple-950/40'
                 : 'bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-slate-200 border border-slate-800'
-              }`}
+            }`}
             title="Toggle module cluster boundaries and layers"
           >
             <Boxes className="w-3.5 h-3.5 text-purple-400" />

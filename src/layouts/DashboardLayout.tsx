@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { PageView } from '../types';
 import { 
@@ -8,17 +7,14 @@ import {
   Sparkles, 
   Terminal, 
   HelpCircle, 
-  ChevronRight, 
-  Menu, 
-  X,
-  LogOut,
-  UserCheck
+  ChevronRight,
+  Menu,
+  X
 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { PatlesLotusLogo } from '../components/PatlesLotusLogo';
 import { ScrollProgressBar } from '../components/ScrollProgressBar';
 import { ScrollToTopButton } from '../components/ScrollToTopButton';
-import { useAuth } from '../context/AuthContext';
 
 interface DashboardLayoutProps {
   currentPage: PageView;
@@ -36,21 +32,23 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const contentRef = useRef<HTMLDivElement>(null);
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const [containerEl, setContainerEl] = useState<HTMLDivElement | null>(null);
+
+  const setContentNode = (node: HTMLDivElement | null) => {
+    contentRef.current = node;
+    setContainerEl(node);
+  };
 
   // Automatically reset scroll position on sub-page transition
   useEffect(() => {
     if (contentRef.current) {
       contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, [currentPage]);
-
-  const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
 
   const getPageTitle = (page: PageView) => {
     switch (page) {
@@ -77,7 +75,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex bg-[#0B1120] text-slate-100">
+    <div className="h-screen overflow-hidden flex bg-[#0B1120] text-slate-100">
       
       {/* Desktop Sidebar */}
       <div className="hidden md:block">
@@ -87,7 +85,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           isCollapsed={isCollapsed}
           onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
           onOpenNewProject={onOpenNewProject}
-          onLogout={handleLogout}
         />
       </div>
 
@@ -120,7 +117,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 onOpenNewProject();
                 setMobileSidebarOpen(false);
               }}
-              onLogout={handleLogout}
             />
           </div>
         </div>
@@ -128,11 +124,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
 
       {/* Main Content Area */}
       <div 
-        ref={contentRef}
-        className="flex-1 flex flex-col min-w-0 overflow-y-auto scroll-smooth relative"
+        ref={setContentNode}
+        className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto scroll-smooth relative"
       >
         {/* Scroll Progress Bar for Dashboard Workspace */}
-        <ScrollProgressBar containerRef={contentRef} />
+        <ScrollProgressBar container={containerEl} containerRef={contentRef} />
         
         {/* Top Header / Search Bar Contract */}
         <header className="sticky top-0 z-20 h-16 bg-[#0B1120]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
@@ -180,7 +176,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <div className="flex items-center gap-2.5">
             <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono text-slate-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>PostgreSQL + JWT Ready</span>
+              <span>IBM Granite 3.0 Ready</span>
             </div>
 
             <button
@@ -199,27 +195,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               + Generate App
             </Button>
-
-            {/* User Session & Logout Action */}
-            <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
-              <div className="text-right hidden xl:block">
-                <div className="text-xs font-semibold text-white leading-tight truncate max-w-[120px]">
-                  {user?.name || 'Developer'}
-                </div>
-                <div className="text-[10px] text-slate-400 font-mono leading-tight truncate max-w-[120px]">
-                  {user?.email || 'authenticated'}
-                </div>
-              </div>
-              <button
-                id="header-logout-btn"
-                onClick={handleLogout}
-                className="p-2 rounded-xl bg-slate-900/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/30 transition-colors cursor-pointer"
-                title="Sign Out / Logout"
-                aria-label="Logout"
-              >
-                <LogOut className="w-4 h-4" />
-              </button>
-            </div>
           </div>
         </header>
 
@@ -229,7 +204,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         </main>
 
         {/* Scroll To Top Button for Dashboard Viewport */}
-        <ScrollToTopButton containerRef={contentRef} threshold={220} />
+        <ScrollToTopButton container={containerEl} containerRef={contentRef} threshold={220} />
       </div>
     </div>
   );
