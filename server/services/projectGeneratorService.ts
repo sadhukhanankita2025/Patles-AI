@@ -253,9 +253,15 @@ export class ProjectGeneratorService {
 
     // Semantic domain detection
     const isHealthcare = pLower.includes('health') || pLower.includes('patient') || pLower.includes('doctor') || pLower.includes('clinic') || pLower.includes('appointment');
+    const isHospital = pLower.includes('hospital') || pLower.includes('admission') || pLower.includes('ward') || pLower.includes('bed');
     const isEcommerce = pLower.includes('shop') || pLower.includes('store') || pLower.includes('cart') || pLower.includes('product') || pLower.includes('commerce') || pLower.includes('order');
-    const isEducation = pLower.includes('course') || pLower.includes('student') || pLower.includes('learn') || pLower.includes('school') || pLower.includes('education') || pLower.includes('lesson');
-    const isFinance = pLower.includes('bank') || pLower.includes('finance') || pLower.includes('wallet') || pLower.includes('crypto') || pLower.includes('invoice') || pLower.includes('payment');
+    const isEducation = pLower.includes('course') || pLower.includes('student') || pLower.includes('learn') || pLower.includes('school') || pLower.includes('campus') || pLower.includes('education') || pLower.includes('lesson') || pLower.includes('university');
+    const isFinance = pLower.includes('bank') || pLower.includes('finance') || pLower.includes('wallet') || pLower.includes('crypto') || pLower.includes('invoice') || pLower.includes('payment') || pLower.includes('wire');
+    const isFoodDelivery = pLower.includes('food') || pLower.includes('delivery') || pLower.includes('restaurant') || pLower.includes('menu') || pLower.includes('dish') || pLower.includes('eats') || pLower.includes('meal');
+    const isFitness = pLower.includes('fitness') || pLower.includes('workout') || pLower.includes('gym') || pLower.includes('calorie') || pLower.includes('exercise') || pLower.includes('tracking') && (pLower.includes('fit') || pLower.includes('health'));
+    const isAIChat = pLower.includes('chat') || pLower.includes('ai app') || pLower.includes('llm') || pLower.includes('bot') || pLower.includes('assistant') || pLower.includes('conversation');
+    const isCRM = pLower.includes('crm') || pLower.includes('lead') || pLower.includes('deal') || pLower.includes('pipeline') || pLower.includes('sales') || pLower.includes('dashboard') && pLower.includes('client');
+    const isPortfolio = pLower.includes('portfolio') || pLower.includes('showcase') || pLower.includes('resume') || pLower.includes('cv') || pLower.includes('designer') || pLower.includes('developer portfolio');
 
     let name = 'AppMatrix';
     let entitySingular = 'item';
@@ -265,7 +271,91 @@ export class ProjectGeneratorService {
     let description = 'Full-stack cloud application generated with Patles.ai';
     let features = ['User Authentication', 'Data Management', 'REST API Layer', 'Relational Database'];
 
-    if (isHealthcare) {
+    if (isFoodDelivery) {
+      name = 'QuickBite';
+      entitySingular = 'order';
+      entityPlural = 'orders';
+      tablePrimary = 'orders';
+      tableSecondary = 'restaurants';
+      description = 'On-demand food delivery platform with restaurant menus, interactive cart, GPS order tracking, and rider dispatch.';
+      features = [
+        'Customer & Courier Authentication',
+        'Restaurant Menus & Dish Customization',
+        'Live Cart & Multi-Item Checkout',
+        'Real-time GPS Delivery Tracking',
+        'PostgreSQL Order & Item Relational Storage'
+      ];
+    } else if (isFitness) {
+      name = 'PulseFit';
+      entitySingular = 'workout';
+      entityPlural = 'workouts';
+      tablePrimary = 'workouts';
+      tableSecondary = 'exercises';
+      description = 'Personal health and fitness tracking web app with workout routines, calorie expenditure logging, and streak trophies.';
+      features = [
+        'Member Profile & Metric Goals',
+        'Daily Workout Planner & Exercise Log',
+        'Calorie & Macronutrient Tracker',
+        'Weekly Activity Radar & Streaks',
+        'PostgreSQL Relational Workout Schema'
+      ];
+    } else if (isAIChat) {
+      name = 'NexusAI';
+      entitySingular = 'conversation';
+      entityPlural = 'conversations';
+      tablePrimary = 'messages';
+      tableSecondary = 'chat_sessions';
+      description = 'Intelligent AI chat application with multi-model switching, streaming markdown responses, session memory, and voice input.';
+      features = [
+        'User Session Authentication',
+        'Multi-Model Chat Routing (GPT, Claude, Gemini)',
+        'Streaming Markdown & Code Block Viewer',
+        'Conversation History & Session Storage',
+        'PostgreSQL Message & Token Usage Schema'
+      ];
+    } else if (isCRM) {
+      name = 'VanguardCRM';
+      entitySingular = 'deal';
+      entityPlural = 'deals';
+      tablePrimary = 'deals';
+      tableSecondary = 'leads';
+      description = 'Executive B2B CRM dashboard with deal pipelines, lead status tracking, conversion charts, and automated team reminders.';
+      features = [
+        'Team Role-based Authentication',
+        'Visual Deal Pipeline & Kanban Stages',
+        'Lead Scoring & Conversion Funnel',
+        'Monthly Revenue & Quota Analytics',
+        'PostgreSQL Deal & Customer Relationship Schema'
+      ];
+    } else if (isPortfolio) {
+      name = 'DevFolio';
+      entitySingular = 'project';
+      entityPlural = 'projects';
+      tablePrimary = 'projects';
+      tableSecondary = 'testimonials';
+      description = 'Dark mode developer portfolio website with interactive project showcase, skill radar, client testimonials, and contact form.';
+      features = [
+        'Admin Authentication for Content Edits',
+        'Interactive Project Showcase & Tech Badges',
+        'Technical Skill Matrix & Experience Timeline',
+        'Direct Client Inquiry Contact Form',
+        'PostgreSQL Showcase & Message Storage'
+      ];
+    } else if (isHospital) {
+      name = 'HospitalPulse';
+      entitySingular = 'admission';
+      entityPlural = 'admissions';
+      tablePrimary = 'admissions';
+      tableSecondary = 'wards';
+      description = 'Comprehensive hospital management system for patient admission, bed allocation, doctor schedules, and digital prescriptions.';
+      features = [
+        'Staff & Physician Authentication',
+        'Patient Admission & Ward Bed Allocation',
+        'Doctor Shift Schedules & Triage',
+        'Digital Prescriptions & Lab Order History',
+        'HIPAA-Compliant PostgreSQL Relational Storage'
+      ];
+    } else if (isHealthcare) {
       name = 'CareConnect';
       entitySingular = 'appointment';
       entityPlural = 'appointments';
