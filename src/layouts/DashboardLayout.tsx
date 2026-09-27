@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { PageView } from '../types';
 import { 
@@ -7,12 +8,15 @@ import {
   Sparkles, 
   Terminal, 
   HelpCircle, 
-  ChevronRight,
-  Menu,
-  X
+  ChevronRight, 
+  Menu, 
+  X,
+  LogOut,
+  UserCheck
 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { PatlesLotusLogo } from '../components/PatlesLotusLogo';
+import { useAuth } from '../context/AuthContext';
 
 interface DashboardLayoutProps {
   currentPage: PageView;
@@ -30,6 +34,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const getPageTitle = (page: PageView) => {
     switch (page) {
@@ -69,6 +80,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           isCollapsed={isCollapsed}
           onToggleCollapse={() => setIsCollapsed(!isCollapsed)}
           onOpenNewProject={onOpenNewProject}
+          onLogout={handleLogout}
         />
       </div>
 
@@ -101,6 +113,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 onOpenNewProject();
                 setMobileSidebarOpen(false);
               }}
+              onLogout={handleLogout}
             />
           </div>
         </div>
@@ -155,7 +168,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <div className="flex items-center gap-2.5">
             <div className="hidden lg:flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-slate-800 text-[11px] font-mono text-slate-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>IBM Granite 3.0 Ready</span>
+              <span>PostgreSQL + JWT Ready</span>
             </div>
 
             <button
@@ -175,6 +188,27 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             >
               + Generate App
             </Button>
+
+            {/* User Session & Logout Action */}
+            <div className="flex items-center gap-2 pl-2 border-l border-slate-800">
+              <div className="text-right hidden xl:block">
+                <div className="text-xs font-semibold text-white leading-tight truncate max-w-[120px]">
+                  {user?.name || 'Developer'}
+                </div>
+                <div className="text-[10px] text-slate-400 font-mono leading-tight truncate max-w-[120px]">
+                  {user?.email || 'authenticated'}
+                </div>
+              </div>
+              <button
+                id="header-logout-btn"
+                onClick={handleLogout}
+                className="p-2 rounded-xl bg-slate-900/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/30 transition-colors cursor-pointer"
+                title="Sign Out / Logout"
+                aria-label="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </header>
 

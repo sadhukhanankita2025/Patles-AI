@@ -1138,7 +1138,7 @@ npm run dev
   async getAllProjects(userId?: string): Promise<ProjectRow[]> {
     const list = Array.from(this.projects.values());
     if (userId) {
-      return list.filter(p => p.user_id === userId || p.user_id === 'usr_developer');
+      return list.filter(p => p.user_id === userId);
     }
     return list;
   }

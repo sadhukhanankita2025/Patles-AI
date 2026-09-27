@@ -3,13 +3,41 @@ import { projectStore } from '../db/projectStore.js';
 import { projectGeneratorService } from '../services/projectGeneratorService.js';
 import { projectAnalysisService } from '../services/projectAnalysisService.js';
 import { aiService } from '../services/aiService.js';
+import { authService } from '../services/authService.js';
 
 export const projectRouter = express.Router();
 
-// Helper to authenticate user context (defaults to active user)
-const getUserId = (req: Request): string => {
-  return (req.headers['x-user-id'] as string) || 'usr_developer';
+const getSessionToken = (req: Request): string | undefined => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7).trim();
+  }
+  return req.headers.cookie?.split(';').map(value => value.trim()).find(value => value.startsWith('patles_session='))?.slice('patles_session='.length);
 };
+
+// All project operations require a server-validated session.
+const getUserId = async (req: Request): Promise<string> => {
+  const token = getSessionToken(req);
+  const user = await authService.getSessionUser(token);
+  if (!user) throw new Error('Unauthorized');
+  return user.id;
+};
+
+projectRouter.use(async (req, res, next) => {
+  try {
+    res.locals.userId = await getUserId(req);
+    next();
+  } catch {
+    res.status(401).json({ error: 'Authentication is required to access projects.' });
+  }
+});
+
+projectRouter.param('projectId', async (req, res, next, projectId) => {
+  const project = await projectStore.getProjectById(projectId);
+  if (!project || project.user_id !== res.locals.userId) return res.status(404).json({ error: 'Project not found.' });
+  res.locals.project = project;
+  next();
+});
 
 /**
  * POST /api/projects/generate
@@ -18,7 +46,7 @@ const getUserId = (req: Request): string => {
 projectRouter.post('/generate', async (req: Request, res: Response) => {
   try {
     const { prompt, frontend, backend, database, projectType } = req.body;
-    const userId = getUserId(req);
+    const userId = res.locals.userId;
 
     if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
       return res.status(400).json({ error: 'Prompt is required.' });
@@ -51,7 +79,7 @@ projectRouter.post('/generate', async (req: Request, res: Response) => {
  */
 projectRouter.get('/', async (req: Request, res: Response) => {
   try {
-    const userId = getUserId(req);
+    const userId = res.locals.userId;
     const projects = await projectStore.getAllProjects(userId);
     res.json({ projects });
   } catch (err: any) {

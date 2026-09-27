@@ -1,186 +1,277 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
 import { PageView, AuthMode } from './types';
 import { MainLayout } from './layouts/MainLayout';
 import { DashboardLayout } from './layouts/DashboardLayout';
 import { LandingPage } from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
-import { PromptGeneratorPage } from './pages/PromptGeneratorPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SubModulesPage } from './pages/SubModulesPage';
 import { GitHubIntelligencePage } from './pages/GitHubIntelligencePage';
 import { WorkflowPage } from './pages/WorkflowPage';
+import { ScrollToTop } from './components/ScrollToTop';
+import { BuilderPage } from './pages/BuilderPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+const WorkflowParamWrapper = ({ onNavigate }: { onNavigate: (page: PageView) => void }) => {
+  const { repoId } = useParams<{ repoId: string }>();
+  return (
+    <WorkflowPage
+      repositoryId={repoId}
+      onNavigate={onNavigate}
+      onBackToRepo={() => onNavigate('github')}
+    />
+  );
+};
 
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<PageView>('landing');
-  const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const navigate = useNavigate();
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
-  const [workflowRepoId, setWorkflowRepoId] = useState<string | undefined>(undefined);
 
-  // Sync with browser URL /github/:id/workflow
-  useEffect(() => {
-    const handleLocationChange = () => {
-      if (typeof window === 'undefined') return;
-      const path = window.location.pathname;
-      const match = path.match(/^\/github\/([^/]+)\/workflow/);
-      if (match && match[1]) {
-        setWorkflowRepoId(match[1]);
-        setCurrentPage('workflow');
-      } else if (path === '/workflow') {
-        setCurrentPage('workflow');
-      }
-    };
-
-    handleLocationChange();
-    window.addEventListener('popstate', handleLocationChange);
-    return () => window.removeEventListener('popstate', handleLocationChange);
-  }, []);
-
-  const handleStartWithPrompt = (prompt: string) => {
-    setSelectedPrompt(prompt);
-    setCurrentPage('ai-builder');
+  const handleNavigate = (page: PageView) => {
+    if (page === 'landing') navigate('/');
+    else if (page === 'auth') navigate('/login');
+    else navigate(`/${page}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOpenAuth = (mode: AuthMode = 'login') => {
-    setAuthMode(mode);
-    setCurrentPage('auth');
+    navigate(`/${mode === 'signup' ? 'signup' : 'login'}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleAuthSuccess = () => {
-    setCurrentPage('dashboard');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleStartWithPrompt = (prompt: string) => {
+    setSelectedPrompt(prompt);
+    navigate('/ai-builder');
   };
 
   const handleOpenNewProject = () => {
     setSelectedPrompt('');
-    setCurrentPage('ai-builder');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate('/ai-builder');
   };
 
-  // Determine whether current page belongs to developer dashboard layout
-  const isDashboardView = [
-    'dashboard',
-    'ai-builder',
+  // Handle OAuth callback redirect if present
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get('oauth') === 'success') {
+      window.history.replaceState({}, '', '/dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
+
+  const protectedSubPages: PageView[] = [
     'workspace',
+    'my-projects',
     'ai-chat',
     'code-review',
     'debugger',
     'deployment',
     'documentation',
-    'github-import',
-    'github',
-    'workflow',
     'profile'
-  ].includes(currentPage);
+  ];
 
-  if (isDashboardView) {
-    return (
-      <DashboardLayout
-        currentPage={currentPage}
-        onNavigate={(page) => {
-          if (page === 'workflow' && workflowRepoId) {
-            window.history.pushState({}, '', `/github/${workflowRepoId}/workflow`);
-          } else if (page === 'workflow') {
-            window.history.pushState({}, '', '/workflow');
-          } else if (window.location.pathname.includes('/workflow')) {
-            window.history.pushState({}, '', '/');
-          }
-          setCurrentPage(page);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-        onOpenNewProject={handleOpenNewProject}
-      >
-        {currentPage === 'dashboard' && (
-          <DashboardPage
-            onNavigate={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onOpenNewProject={handleOpenNewProject}
-          />
-        )}
-
-        {currentPage === 'ai-builder' && (
-          <PromptGeneratorPage
-            initialPrompt={selectedPrompt}
-            onOpenDeploy={(proj) => {
-              setCurrentPage('deployment');
-            }}
-          />
-        )}
-
-        {(currentPage === 'github-import' || currentPage === 'github') && (
-          <GitHubIntelligencePage
-            onNavigate={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          />
-        )}
-
-        {currentPage === 'workflow' && (
-          <WorkflowPage
-            repositoryId={workflowRepoId}
-            onNavigate={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onBackToRepo={() => {
-              setCurrentPage('github');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          />
-        )}
-
-        {currentPage !== 'dashboard' && 
-         currentPage !== 'ai-builder' && 
-         currentPage !== 'github-import' && 
-         currentPage !== 'github' && 
-         currentPage !== 'workflow' && (
-          <SubModulesPage
-            page={currentPage}
-            onNavigate={(page) => {
-              setCurrentPage(page);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-            onOpenNewProject={handleOpenNewProject}
-          />
-        )}
-      </DashboardLayout>
-    );
-  }
-
-  // Public / Landing / Auth layout
   return (
-    <MainLayout
-      currentPage={currentPage}
-      onNavigate={(page) => {
-        setCurrentPage(page);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }}
-      onOpenAuth={handleOpenAuth}
-    >
-      {currentPage === 'landing' && (
-        <LandingPage
-          onNavigate={(page) => {
-            setCurrentPage(page);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onStartWithPrompt={handleStartWithPrompt}
+    <>
+      <Routes>
+        {/* Public Landing Page */}
+        <Route
+          path="/"
+          element={
+            <MainLayout
+              currentPage="landing"
+              onNavigate={handleNavigate}
+              onOpenAuth={handleOpenAuth}
+            >
+              <LandingPage
+                onNavigate={handleNavigate}
+                onStartWithPrompt={handleStartWithPrompt}
+              />
+            </MainLayout>
+          }
         />
-      )}
 
-      {currentPage === 'auth' && (
-        <AuthPage
-          initialMode={authMode}
-          onSuccess={handleAuthSuccess}
-          onNavigate={(page) => {
-            setCurrentPage(page);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
+        {/* Public Authentication Pages */}
+        <Route
+          path="/login"
+          element={
+            <MainLayout
+              currentPage="auth"
+              onNavigate={handleNavigate}
+              onOpenAuth={handleOpenAuth}
+            >
+              <AuthPage
+                initialMode="login"
+                onNavigate={handleNavigate}
+              />
+            </MainLayout>
+          }
         />
-      )}
-    </MainLayout>
+
+        <Route
+          path="/signup"
+          element={
+            <MainLayout
+              currentPage="auth"
+              onNavigate={handleNavigate}
+              onOpenAuth={handleOpenAuth}
+            >
+              <AuthPage
+                initialMode="signup"
+                onNavigate={handleNavigate}
+              />
+            </MainLayout>
+          }
+        />
+
+        <Route
+          path="/auth"
+          element={
+            <MainLayout
+              currentPage="auth"
+              onNavigate={handleNavigate}
+              onOpenAuth={handleOpenAuth}
+            >
+              <AuthPage
+                initialMode="login"
+                onNavigate={handleNavigate}
+              />
+            </MainLayout>
+          }
+        />
+
+        {/* Protected Dashboard Route */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout
+                currentPage="dashboard"
+                onNavigate={handleNavigate}
+                onOpenNewProject={handleOpenNewProject}
+              >
+                <DashboardPage
+                  onNavigate={handleNavigate}
+                  onOpenNewProject={handleOpenNewProject}
+                />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected AI Builder Route */}
+        <Route
+          path="/ai-builder"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout
+                currentPage="ai-builder"
+                onNavigate={handleNavigate}
+                onOpenNewProject={handleOpenNewProject}
+              >
+                <BuilderPage
+                  initialPrompt={selectedPrompt}
+                  onNavigate={handleNavigate}
+                />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected GitHub Intelligence Routes */}
+        <Route
+          path="/github"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout
+                currentPage="github"
+                onNavigate={handleNavigate}
+                onOpenNewProject={handleOpenNewProject}
+              >
+                <GitHubIntelligencePage
+                  onNavigate={handleNavigate}
+                />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/github-import"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout
+                currentPage="github-import"
+                onNavigate={handleNavigate}
+                onOpenNewProject={handleOpenNewProject}
+              >
+                <GitHubIntelligencePage
+                  onNavigate={handleNavigate}
+                />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Workflow Routes */}
+        <Route
+          path="/workflow"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout
+                currentPage="workflow"
+                onNavigate={handleNavigate}
+                onOpenNewProject={handleOpenNewProject}
+              >
+                <WorkflowPage
+                  onNavigate={handleNavigate}
+                  onBackToRepo={() => handleNavigate('github')}
+                />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/github/:repoId/workflow"
+          element={
+            <ProtectedRoute>
+              <DashboardLayout
+                currentPage="workflow"
+                onNavigate={handleNavigate}
+                onOpenNewProject={handleOpenNewProject}
+              >
+                <WorkflowParamWrapper onNavigate={handleNavigate} />
+              </DashboardLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Protected Submodule Routes */}
+        {protectedSubPages.map((subPage) => (
+          <Route
+            key={subPage}
+            path={`/${subPage}`}
+            element={
+              <ProtectedRoute>
+                <DashboardLayout
+                  currentPage={subPage}
+                  onNavigate={handleNavigate}
+                  onOpenNewProject={handleOpenNewProject}
+                >
+                  <SubModulesPage
+                    page={subPage}
+                    onNavigate={handleNavigate}
+                    onOpenNewProject={handleOpenNewProject}
+                  />
+                </DashboardLayout>
+              </ProtectedRoute>
+            }
+          />
+        ))}
+
+        {/* Fallback to Home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <ScrollToTop />
+    </>
   );
 }

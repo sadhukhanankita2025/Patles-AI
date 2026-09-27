@@ -1,6 +1,18 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    scrollbar-gutter: stable;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
   :root {
     --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -11,6 +23,19 @@
     background-color: #050816;
     color: #F1F5F9;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Keep all independently scrollable panels pleasant on touch devices too. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 #050816;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  main [id] {
+    scroll-margin-top: 5rem;
   }
 
   /* Custom scrollbar for dark aesthetic */
@@ -27,6 +52,12 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: #334155;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
 }
 
