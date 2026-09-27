@@ -3,7 +3,7 @@ export type PageView =
   | 'auth' 
   | 'ai-builder' 
   | 'dashboard'
-  | 'my-projects'
+
   | 'project-dashboard'
   | 'workspace'
   | 'deployment'

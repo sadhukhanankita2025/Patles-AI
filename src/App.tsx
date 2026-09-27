@@ -60,10 +60,6 @@ export default function App() {
 
   const protectedSubPages: PageView[] = [
     'workspace',
-    'my-projects',
-    'ai-chat',
-    'code-review',
-    'debugger',
     'deployment',
     'documentation',
     'profile'

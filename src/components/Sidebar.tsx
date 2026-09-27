@@ -11,7 +11,8 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
-  Plus
+  Plus,
+  LogOut
 } from 'lucide-react';
 import { PageView } from '../types';
 import { PatlesLotusLogo } from './PatlesLotusLogo';
@@ -39,8 +40,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const menuItems = [
     { id: 'dashboard' as PageView, label: 'Dashboard', icon: LayoutDashboard },
     { id: 'ai-builder' as PageView, label: 'AI Builder', icon: Wand2, highlight: true },
-    { id: 'my-projects' as PageView, label: 'My Projects', icon: FolderKanban },
-    { id: 'workspace' as PageView, label: 'Workspace', icon: FolderGit2 },
+    { id: 'workspace' as PageView, label: 'My Project', icon: FolderGit2 },
     { id: 'deployment' as PageView, label: 'Deployment', icon: Server },
     { id: 'documentation' as PageView, label: 'Documentation', icon: FileCode2 },
     { id: 'github-import' as PageView, label: 'GitHub Intelligence', icon: Github },

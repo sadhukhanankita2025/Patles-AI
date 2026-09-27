@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '../components/Sidebar';
 import { PageView } from '../types';
@@ -16,6 +16,8 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { PatlesLotusLogo } from '../components/PatlesLotusLogo';
+import { ScrollProgressBar } from '../components/ScrollProgressBar';
+import { ScrollToTopButton } from '../components/ScrollToTopButton';
 import { useAuth } from '../context/AuthContext';
 
 interface DashboardLayoutProps {
@@ -34,8 +36,16 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const contentRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Automatically reset scroll position on sub-page transition
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
 
   const handleLogout = async () => {
     await logout();
