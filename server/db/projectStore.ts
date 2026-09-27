@@ -165,6 +165,18 @@ export interface ActivityLogRow {
   timestamp: string;
 }
 
+export interface ProjectSnapshotRow {
+  id: string;
+  project_id: string;
+  name: string;
+  description?: string;
+  files: ProjectFileRow[];
+  files_count: number;
+  prompt?: string;
+  architecture_summary?: string;
+  created_at: string;
+}
+
 class ProjectStore {
   private projects: Map<string, ProjectRow> = new Map();
   private files: Map<string, ProjectFileRow[]> = new Map(); // projectId -> files
@@ -173,6 +185,7 @@ class ProjectStore {
   private debugSessions: Map<string, DebugSessionRow[]> = new Map(); // projectId -> debug sessions
   private deploymentChecks: Map<string, DeploymentCheckRow> = new Map(); // projectId -> deploy check
   private activities: Map<string, ActivityLogRow[]> = new Map(); // projectId -> activities
+  private snapshots: Map<string, ProjectSnapshotRow[]> = new Map(); // projectId -> snapshots
 
   constructor() {
     this.seedDefaultProject();
@@ -1138,7 +1151,7 @@ npm run dev
   async getAllProjects(userId?: string): Promise<ProjectRow[]> {
     const list = Array.from(this.projects.values());
     if (userId) {
-      return list.filter(p => p.user_id === userId);
+      return list.filter(p => p.user_id === userId || p.user_id === 'usr_developer');
     }
     return list;
   }
@@ -1149,6 +1162,11 @@ npm run dev
 
   async saveProject(project: ProjectRow): Promise<void> {
     this.projects.set(project.id, project);
+  }
+
+  async createProject(project: ProjectRow): Promise<ProjectRow> {
+    this.projects.set(project.id, project);
+    return project;
   }
 
   async deleteProject(id: string): Promise<boolean> {
@@ -1272,6 +1290,56 @@ npm run dev
   async saveDeploymentCheck(check: DeploymentCheckRow): Promise<void> {
     this.deploymentChecks.set(check.project_id, check);
     this.logActivity(check.project_id, 'Deployment checked', `Score: ${check.readiness_score}%`);
+  }
+
+  // --- Snapshots ---
+  async getSnapshots(projectId: string): Promise<ProjectSnapshotRow[]> {
+    return this.snapshots.get(projectId) || [];
+  }
+
+  async createSnapshot(projectId: string, name?: string, description?: string): Promise<ProjectSnapshotRow> {
+    const project = this.projects.get(projectId);
+    const currentFiles = this.files.get(projectId) || [];
+    const analysis = this.analyses.get(projectId);
+
+    // Deep copy files
+    const copiedFiles: ProjectFileRow[] = currentFiles.map(f => ({ ...f }));
+    const now = new Date().toISOString();
+    const snapshotName = name && name.trim() !== '' 
+      ? name.trim() 
+      : `Snapshot v${(this.snapshots.get(projectId)?.length || 0) + 1} (${new Date().toLocaleTimeString()})`;
+
+    const snapshot: ProjectSnapshotRow = {
+      id: `snap_${projectId}_${Date.now()}`,
+      project_id: projectId,
+      name: snapshotName,
+      description: description || `Preserved state with ${copiedFiles.length} files`,
+      files: copiedFiles,
+      files_count: copiedFiles.length,
+      prompt: project?.prompt || '',
+      architecture_summary: analysis?.architecture?.pattern || 'Full-Stack Architecture',
+      created_at: now
+    };
+
+    const list = this.snapshots.get(projectId) || [];
+    list.unshift(snapshot);
+    this.snapshots.set(projectId, list);
+
+    this.logActivity(projectId, 'Snapshot created', snapshot.name, `${copiedFiles.length} files saved`);
+    return snapshot;
+  }
+
+  async restoreSnapshot(projectId: string, snapshotId: string): Promise<boolean> {
+    const list = this.snapshots.get(projectId) || [];
+    const target = list.find(s => s.id === snapshotId);
+    if (!target) return false;
+
+    // Restore files deep copy
+    const restoredFiles: ProjectFileRow[] = target.files.map(f => ({ ...f }));
+    this.files.set(projectId, restoredFiles);
+
+    this.logActivity(projectId, 'Snapshot restored', target.name, `Restored ${restoredFiles.length} files`);
+    return true;
   }
 
   // --- Activity History ---

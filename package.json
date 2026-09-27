@@ -5,12 +5,15 @@
   "type": "module",
   "scripts": {
     "dev": "bun server.ts",
+    "netlify:dev": "netlify dev",
     "build": "vite build",
     "start": "bun server.ts",
     "preview": "vite preview",
     "seed": "tsx server/db/seed.ts",
+
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "netlify:build": "npm run build"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
@@ -24,8 +27,8 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "framer-motion": "^13.4.3",
-    "jszip": "^3.10.2",
     "jsonwebtoken": "^9.0.2",
+    "jszip": "^3.10.2",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
     "pg": "^8.13.1",
@@ -35,6 +38,7 @@
     "react-router": "^7.18.2",
     "react-router-dom": "^7.18.2",
     "recharts": "^3.10.1",
+    "serverless-http": "^4.0.0",
     "set-cookie-parser": "^2.6.0",
     "vite": "^8.3.0"
   },
@@ -53,6 +57,7 @@
     "esbuild": "^0.28.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "netlify-cli": "^17.0.0"
   }
 }

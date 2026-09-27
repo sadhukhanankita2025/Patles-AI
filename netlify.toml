@@ -1,0 +1,29 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
+  # pg and bcrypt use native modules — keep them external so Lambda includes them
+  external_node_modules = ["pg", "pg-native", "bcrypt"]
+
+# Route ALL /api/* requests to the serverless function
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+  force = true
+
+# SPA fallback: serve index.html for all non-file routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production.environment]
+  NODE_ENV = "production"
+  VITE_DEPLOY_ENV = "netlify"
+
+[context.deploy-preview.environment]
+  NODE_ENV = "production"
