@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PageView } from '../types';
 import { 
   GitHubRepoMetadata, 
@@ -100,6 +101,18 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
     }
   };
 
+  const loadFilesForRepository = async (repoId: string) => {
+    try {
+      const filesRes = await fetch(`/api/github/repositories/${repoId}/files`);
+      if (filesRes.ok) {
+        const filesData = await filesRes.json();
+        setFiles(filesData.files || []);
+      }
+    } catch (err) {
+      console.warn('Failed to load files:', err);
+    }
+  };
+
   const updateProgress = (stepIndex: number) => {
     setCurrentStepIndex(stepIndex);
     setProgressSteps(prev =>
@@ -159,11 +172,7 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
       setAnalysis(data.analysis);
 
       // Fetch file tree for explorer
-      const filesRes = await fetch(`/api/github/repositories/${data.repository.id}/files`);
-      if (filesRes.ok) {
-        const filesData = await filesRes.json();
-        setFiles(filesData.files || []);
-      }
+      await loadFilesForRepository(data.repository.id);
 
       fetchHistory();
     } catch (err: any) {
@@ -251,7 +260,12 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
         </div>
       ) : (
         /* 2. Repository Intelligence Dashboard */
-        <div className="space-y-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-6"
+        >
           
           {/* Top Bar with Switch Repo action */}
           <div className="flex items-center justify-between">
@@ -260,8 +274,12 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
                 setRepository(null);
                 setAnalysis(null);
                 setFiles([]);
+                setSelectedFilePath(undefined);
+                setErrorMessage(null);
+                setActiveTab('overview');
+                fetchHistory();
               }}
-              className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:underline cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-xs font-mono text-cyan-400 hover:text-cyan-300 border border-slate-700/80 transition-colors cursor-pointer shadow-sm"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Import Another Repository</span>
@@ -393,6 +411,7 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
                 files={files}
                 defaultFilePath={selectedFilePath}
                 onSwitchToFileAnalysis={() => setActiveTab('file-analysis')}
+                onReloadFiles={() => loadFilesForRepository(repository.id)}
               />
             )}
 
@@ -472,7 +491,7 @@ export const GitHubIntelligencePage: React.FC<GitHubIntelligencePageProps> = ({
 
           </div>
 
-        </div>
+        </motion.div>
       )}
 
     </div>

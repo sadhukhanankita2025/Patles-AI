@@ -10,13 +10,15 @@ interface RepositoryExplorerProps {
   files: RepositoryFileItem[];
   defaultFilePath?: string;
   onSwitchToFileAnalysis?: () => void;
+  onReloadFiles?: () => void;
 }
 
 export const RepositoryExplorer: React.FC<RepositoryExplorerProps> = ({
   repositoryId,
   files,
   defaultFilePath,
-  onSwitchToFileAnalysis
+  onSwitchToFileAnalysis,
+  onReloadFiles
 }) => {
   const [selectedFile, setSelectedFile] = useState<RepositoryFileItem | null>(null);
   const [fileContent, setFileContent] = useState<string>('');
@@ -28,20 +30,29 @@ export const RepositoryExplorer: React.FC<RepositoryExplorerProps> = ({
   const [isExplaining, setIsExplaining] = useState(false);
   const [showAnalysisPanel, setShowAnalysisPanel] = useState(true);
 
-  // Initialize with default file or first source file
+  // Reset file selection when switching repositories
+  useEffect(() => {
+    setSelectedFile(null);
+    setFileContent('');
+    setFileExplanation(null);
+    setFolderExplanation(null);
+  }, [repositoryId]);
+
+  // Initialize with default file or first source file when files load
   useEffect(() => {
     if (files.length > 0) {
       const target = defaultFilePath 
         ? files.find(f => f.path === defaultFilePath)
         : files.find(f => f.fileName === 'package.json') ||
-          files.find(f => f.fileName.includes('App') || f.fileName.includes('server')) ||
+          files.find(f => f.fileName === 'README.md') ||
+          files.find(f => f.fileName.includes('App') || f.fileName.includes('server') || f.fileName.includes('index') || f.fileName.includes('main')) ||
           files[0];
 
       if (target) {
         handleSelectFile(target);
       }
     }
-  }, [files, defaultFilePath]);
+  }, [files, defaultFilePath, repositoryId]);
 
   const handleSelectFile = async (file: RepositoryFileItem) => {
     setSelectedFile(file);

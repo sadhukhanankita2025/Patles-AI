@@ -1,12 +1,12 @@
-import { 
-  FeatureItem, 
-  TemplateItem, 
-  AnalyticsMetric, 
-  ProjectRecord, 
-  ActivityItem, 
+import {
+  FeatureItem,
+  TemplateItem,
+  AnalyticsMetric,
+  ProjectRecord,
+  ActivityItem,
   AITip,
   AIModel,
-  GeneratedProjectStructure 
+  GeneratedProjectStructure
 } from '../types';
 
 export const AI_MODELS: AIModel[] = [
@@ -91,22 +91,22 @@ export const FEATURES: FeatureItem[] = [
     metrics: '200k+ token context'
   },
   {
-    id: 'code-review',
-    title: 'AI Code Review',
-    description: 'Automated PR analysis that detects race conditions, memory leaks, OWASP security vulnerabilities, and accessibility compliance before merging.',
-    category: 'Quality',
-    iconName: 'ShieldCheck',
-    badgeText: 'Security Hardened',
-    metrics: '99.4% precision'
+    id: 'workflow-graph',
+    title: 'Architecture Workflow Graph',
+    description: 'Visual interactive architecture graph mapping normalized repository nodes, endpoints, controllers, and database tables with auto-computed DAG layouts.',
+    category: 'Architecture',
+    iconName: 'Workflow',
+    badgeText: 'Multi-Tiered Graph',
+    metrics: 'Auto-layout DAG'
   },
   {
-    id: 'debugging',
-    title: 'AI Debugging',
-    description: 'Paste stack traces or unhandled exceptions to receive root-cause explanations with single-click automated patch pull requests that resolve edge cases.',
-    category: 'Diagnostics',
-    iconName: 'Bug',
-    badgeText: 'Auto-Remediation',
-    metrics: 'Zero-config patches'
+    id: 'dependency-mapper',
+    title: 'Full-Stack Dependency Mapper',
+    description: 'Synthesizes structural dependencies across frontend routes, API contracts, controllers, models, and relational tables into clear visual lineage.',
+    category: 'Intelligence',
+    iconName: 'Layers',
+    badgeText: 'Schema & Route Linage',
+    metrics: 'Multi-repo tracking'
   },
   {
     id: 'deployment-validator',
@@ -213,13 +213,13 @@ export const ANALYTICS_METRICS: AnalyticsMetric[] = [
     sparkline: [22, 26, 28, 30, 31, 35, 38, 42, 45, 52]
   },
   {
-    id: 'code-reviews',
-    title: 'Code Reviews Completed',
+    id: 'workflow-nodes',
+    title: 'Workflow Nodes Mapped',
     value: '5,892',
     change: '+42.1%',
     changeType: 'positive',
     timeframe: 'vs last 30 days',
-    iconName: 'ShieldCheck',
+    iconName: 'Workflow',
     sparkline: [120, 140, 165, 180, 210, 240, 280, 310, 340, 390]
   },
   {
@@ -304,8 +304,8 @@ export const RECENT_PROJECTS: ProjectRecord[] = [
 export const RECENT_ACTIVITIES: ActivityItem[] = [
   {
     id: 'act-1',
-    action: 'Code Review Approved',
-    target: 'PR #142 - Refactor auth session tokens',
+    action: 'Workflow Graph Analyzed',
+    target: 'Repo auth-jwt-gateway · 24 nodes linked',
     timestamp: '8 mins ago',
     status: 'completed',
     model: 'IBM Granite 3.0',
@@ -359,9 +359,9 @@ export const AI_TIPS: AITip[] = [
   },
   {
     id: 'tip-2',
-    title: 'Automated Test Generation',
-    content: 'Use Patles.ai Debugger tab to generate complementary Vitest unit tests right alongside your bug fixes.',
-    category: 'Testing',
+    title: 'Interactive Workflow Graph',
+    content: 'Navigate the visual repository workflow to trace dependencies from frontend routes down to database models with auto-computed layout.',
+    category: 'Architecture',
     readTime: '2 min read'
   },
   {
@@ -376,7 +376,7 @@ export const AI_TIPS: AITip[] = [
 export function getSampleGeneratedProject(prompt: string, type: 'website' | 'mobile' | 'fullstack', model: string): GeneratedProjectStructure {
   const title = prompt.length > 30 ? prompt.substring(0, 30) + '...' : prompt || 'Generated Application';
   const pattern = type === 'fullstack' ? 'Event-Driven Microservices' : type === 'mobile' ? 'Mobile Backend-as-a-Service' : 'Edge-Accelerated Jamstack';
-  
+
   return {
     projectName: 'Patles-' + (prompt.split(' ')[0] || 'App').toLowerCase() + '-v1',
     projectType: type,
@@ -502,7 +502,7 @@ export default function ApplicationView() {
     <div className="min-h-screen bg-[#0B1120] text-slate-100 p-8">
       <header className="flex justify-between items-center pb-6 border-b border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg shadow-purple-500/20">
+          <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-purple-600 to-cyan-500 flex items-center justify-center font-bold text-white shadow-lg shadow-purple-500/20">
             P
           </div>
           <div>

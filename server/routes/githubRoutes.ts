@@ -203,8 +203,9 @@ githubRouter.post('/import', async (req: Request, res: Response) => {
 
     await repositoryStore.saveRepository(repoRow);
 
-    // Save files
-    const fileRows: RepositoryFileRow[] = tree.map((t, idx) => {
+    // Save files - ONLY blob items are real files, never directories (type === 'tree')
+    const fileBlobs = tree.filter(t => t.type === 'blob');
+    const fileRows: RepositoryFileRow[] = fileBlobs.map((t, idx) => {
       const ext = path.extname(t.path).replace('.', '');
       return {
         id: `file_${metadata.id}_${idx}`,
@@ -300,9 +301,45 @@ githubRouter.get('/repositories/:id', async (req: Request, res: Response) => {
  */
 githubRouter.get('/repositories/:id/files', async (req: Request, res: Response) => {
   try {
-    const files = await repositoryStore.getFiles(req.params.id);
-    // Don't send massive contents array for whole tree listing
-    const simplified = files.map(f => ({
+    let files = await repositoryStore.getFiles(req.params.id);
+
+    // If repository exists but has no files indexed yet (or legacy cache was empty), fetch tree now
+    if (files.length === 0) {
+      const repo = await repositoryStore.getRepository(req.params.id);
+      if (repo) {
+        try {
+          const tree = await githubService.getTree(repo.owner, repo.name, repo.branch || repo.default_branch || 'main');
+          const fileBlobs = tree.filter(t => t.type === 'blob');
+          const newFiles: RepositoryFileRow[] = fileBlobs.map((t, idx) => {
+            const ext = path.extname(t.path).replace('.', '');
+            return {
+              id: `file_${repo.id}_${idx}`,
+              repository_id: repo.id,
+              path: t.path,
+              file_name: path.basename(t.path),
+              language: ext || 'text',
+              size: t.size || 0,
+              content: '',
+              sha: t.sha
+            };
+          });
+          await repositoryStore.saveFiles(repo.id, newFiles);
+          files = newFiles;
+        } catch (treeErr) {
+          console.warn('Failed to on-demand fetch file tree for repository:', treeErr);
+        }
+      }
+    }
+
+    // Filter out directories that might exist in old in-memory caches
+    const filePaths = new Set(files.map(f => f.path));
+    const realFiles = files.filter(f => {
+      // If another path starts with this path + '/', then this path is a directory!
+      const isDir = Array.from(filePaths).some(other => other !== f.path && other.startsWith(f.path + '/'));
+      return !isDir;
+    });
+
+    const simplified = realFiles.map(f => ({
       id: f.id,
       path: f.path,
       fileName: f.file_name,

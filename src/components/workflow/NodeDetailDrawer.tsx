@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
-import { 
-  X, 
-  FileCode, 
-  Terminal, 
-  Database, 
-  Layers, 
-  Sparkles, 
-  ExternalLink, 
-  Copy, 
-  Check, 
+import {
+  X,
+  FileCode,
+  Terminal,
+  Database,
+  Layers,
+  Sparkles,
+  ExternalLink,
+  Copy,
+  Check,
   ArrowRight,
+  ArrowLeft,
   ShieldCheck,
   Cpu,
   Route,
   Loader2,
-  HardDrive
+  HardDrive,
+  Code2,
+  Table,
+  CheckCircle2,
+  Radio
 } from 'lucide-react';
 import { WorkflowNodeItem } from '../../types/workflow';
 import { Button } from '../Button';
@@ -27,6 +32,9 @@ interface NodeDetailDrawerProps {
   onShowConnections: (nodeId: string) => void;
   upstreamCount?: number;
   downstreamCount?: number;
+  upstreamNodes?: WorkflowNodeItem[];
+  downstreamNodes?: WorkflowNodeItem[];
+  onSelectNodeById?: (nodeId: string) => void;
 }
 
 export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
@@ -36,8 +44,12 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
   onExplainWithAi,
   onShowConnections,
   upstreamCount = 0,
-  downstreamCount = 0
+  downstreamCount = 0,
+  upstreamNodes = [],
+  downstreamNodes = [],
+  onSelectNodeById
 }) => {
+  const [activeTab, setActiveTab] = useState<'overview' | 'source' | 'schema' | 'ai'>('overview');
   const [copied, setCopied] = useState(false);
   const [isExplaining, setIsExplaining] = useState(false);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
@@ -59,28 +71,33 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
       const explanation = await onExplainWithAi(node);
       setAiExplanation(explanation);
     } catch {
-      setAiExplanation('Unable to generate AI explanation at this time.');
+      setAiExplanation('Architecture synthesis unavailable at this moment.');
     } finally {
       setIsExplaining(false);
     }
   };
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full sm:w-96 md:w-[420px] bg-[#0B1120]/95 backdrop-blur-2xl border-l border-slate-800 shadow-2xl z-40 flex flex-col transition-all duration-300 animate-in slide-in-from-right">
-      
+    <div className="fixed inset-y-0 right-0 w-full sm:w-110 bg-[#070b16]/95 backdrop-blur-2xl border-l border-slate-800 shadow-2xl z-40 flex flex-col transition-all duration-300 animate-in slide-in-from-right">
+
       {/* Drawer Header */}
-      <div className="p-5 border-b border-slate-800 flex items-start justify-between gap-3">
+      <div className="p-5 border-b border-slate-800/90 flex items-start justify-between gap-3">
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 uppercase font-semibold">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 uppercase font-bold tracking-wider">
               {data.category}
             </span>
             {data.subType && (
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 border border-slate-700 capitalize">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-slate-900 text-slate-300 border border-slate-800 capitalize">
                 {data.subType}
               </span>
             )}
+            <span className="flex items-center gap-1 text-[10px] font-mono text-emerald-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              Active
+            </span>
           </div>
+
           <h3 className="text-base font-bold text-white tracking-wide truncate" title={data.label}>
             {data.label}
           </h3>
@@ -94,183 +111,352 @@ export const NodeDetailDrawer: React.FC<NodeDetailDrawerProps> = ({
         </button>
       </div>
 
+      {/* Tabs */}
+      <div className="flex items-center border-b border-slate-800 px-4 bg-[#050812]">
+        <button
+          onClick={() => setActiveTab('overview')}
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${activeTab === 'overview'
+              ? 'border-cyan-400 text-cyan-300 font-semibold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+        >
+          Overview
+        </button>
+        <button
+          onClick={() => setActiveTab('source')}
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${activeTab === 'source'
+              ? 'border-cyan-400 text-cyan-300 font-semibold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+        >
+          Source & API
+        </button>
+        <button
+          onClick={() => setActiveTab('schema')}
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer ${activeTab === 'schema'
+              ? 'border-cyan-400 text-cyan-300 font-semibold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+        >
+          Contracts
+        </button>
+        <button
+          onClick={() => setActiveTab('ai')}
+          className={`px-3 py-2.5 text-xs font-mono border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${activeTab === 'ai'
+              ? 'border-purple-400 text-purple-300 font-semibold'
+              : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+        >
+          <Sparkles className="w-3 h-3 text-purple-400" />
+          <span>AI Analysis</span>
+        </button>
+      </div>
+
       {/* Drawer Body */}
-      <div className="flex-1 overflow-y-auto p-5 space-y-6 scrollbar-thin scrollbar-thumb-slate-800">
-        
-        {/* Path / Endpoint Display */}
-        {(data.path || data.endpoint) && (
-          <div className="p-3 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-1.5">
-            <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span className="flex items-center gap-1">
-                <FileCode className="w-3.5 h-3.5 text-cyan-400" />
-                {data.endpoint ? 'API Endpoint' : 'File Location'}
-              </span>
+      <div className="flex-1 overflow-y-auto p-5 space-y-5 scrollbar-thin scrollbar-thumb-slate-800 text-xs font-mono">
+
+        {/* TAB 1: OVERVIEW */}
+        {activeTab === 'overview' && (
+          <div className="space-y-5">
+            {/* Description */}
+            {data.description && (
+              <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-1">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Functional Role</span>
+                <p className="text-slate-300 leading-relaxed font-sans text-xs">
+                  {data.description}
+                </p>
+              </div>
+            )}
+
+            {/* Path / Endpoint Display */}
+            {(data.endpoint || data.path) && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">
+                  {data.endpoint ? 'API Endpoint' : 'File Location'}
+                </span>
+                <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 gap-2">
+                  <div className="flex items-center gap-2 truncate">
+                    <FileCode className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                    <span className="text-slate-200 truncate font-mono text-[11px]">
+                      {data.endpoint || data.path}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleCopyPath}
+                    className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors shrink-0 cursor-pointer"
+                    title="Copy path to clipboard"
+                  >
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Ingress / Egress Topology Metrics */}
+            <div className="space-y-3">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Topology Connectivity</span>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <span className="text-slate-500 text-[10px] flex items-center gap-1">
+                    <ArrowLeft className="w-3 h-3 text-emerald-400" /> Upstream Callers
+                  </span>
+                  <p className="text-lg font-bold text-white mt-1">{upstreamCount}</p>
+                </div>
+                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                  <span className="text-slate-500 text-[10px] flex items-center gap-1">
+                    <ArrowRight className="w-3 h-3 text-sky-400" /> Downstream Dependencies
+                  </span>
+                  <p className="text-lg font-bold text-white mt-1">{downstreamCount}</p>
+                </div>
+              </div>
+
               <button
-                onClick={handleCopyPath}
-                className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-white transition-colors cursor-pointer"
+                onClick={() => onShowConnections(node.id)}
+                className="w-full py-2.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 border border-cyan-500/50 text-cyan-300 font-semibold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-cyan-950/40"
               >
-                {copied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                <span>{copied ? 'Copied' : 'Copy'}</span>
+                <Radio className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                <span>Center & Highlight File Connections</span>
+              </button>
+
+              {/* Upstream Connected Files List */}
+              {upstreamNodes.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span className="flex items-center gap-1 text-emerald-400 font-bold uppercase tracking-wider">
+                      <ArrowLeft className="w-3 h-3" />
+                      Incoming Callers ({upstreamNodes.length})
+                    </span>
+                    <span className="text-slate-500 text-[9px]">Click to trace</span>
+                  </div>
+                  <div className="space-y-1 max-h-36 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-800">
+                    {upstreamNodes.map(upNode => (
+                      <div
+                        key={upNode.id}
+                        onClick={() => onSelectNodeById && onSelectNodeById(upNode.id)}
+                        className="p-2 rounded-xl bg-emerald-950/20 hover:bg-emerald-950/50 border border-emerald-900/40 hover:border-emerald-500/60 text-emerald-300 text-[11px] flex items-center justify-between gap-2 transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileCode className="w-3 h-3 text-emerald-400 shrink-0" />
+                          <div className="truncate">
+                            <span className="font-bold text-white group-hover:text-emerald-300 transition-colors block truncate">
+                              {upNode.label}
+                            </span>
+                            <span className="text-[9px] text-slate-500 block truncate font-mono">
+                              {upNode.data.path || upNode.data.endpoint || upNode.category}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-900 text-slate-400 border border-slate-800 uppercase shrink-0">
+                          {upNode.category}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Downstream Connected Files List */}
+              {downstreamNodes.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400">
+                    <span className="flex items-center gap-1 text-sky-400 font-bold uppercase tracking-wider">
+                      <ArrowRight className="w-3 h-3" />
+                      Outgoing Dependencies ({downstreamNodes.length})
+                    </span>
+                    <span className="text-slate-500 text-[9px]">Click to trace</span>
+                  </div>
+                  <div className="space-y-1 max-h-36 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-slate-800">
+                    {downstreamNodes.map(downNode => (
+                      <div
+                        key={downNode.id}
+                        onClick={() => onSelectNodeById && onSelectNodeById(downNode.id)}
+                        className="p-2 rounded-xl bg-sky-950/20 hover:bg-sky-950/50 border border-sky-900/40 hover:border-sky-500/60 text-sky-300 text-[11px] flex items-center justify-between gap-2 transition-all cursor-pointer group"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <FileCode className="w-3 h-3 text-sky-400 shrink-0" />
+                          <div className="truncate">
+                            <span className="font-bold text-white group-hover:text-sky-300 transition-colors block truncate">
+                              {downNode.label}
+                            </span>
+                            <span className="text-[9px] text-slate-500 block truncate font-mono">
+                              {downNode.data.path || downNode.data.endpoint || downNode.category}
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-900 text-slate-400 border border-slate-800 uppercase shrink-0">
+                          {downNode.category}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Direct Connected Entities */}
+            {data.connectedApis && data.connectedApis.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Associated API Endpoints</span>
+                <div className="space-y-1">
+                  {data.connectedApis.map((api, idx) => (
+                    <div key={idx} className="p-2 rounded-lg bg-slate-950 border border-slate-800/80 text-[11px] text-emerald-400 flex items-center gap-1.5">
+                      <Terminal className="w-3 h-3" />
+                      <span>{api}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {data.databaseRelations && data.databaseRelations.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Database Entities & Tables</span>
+                <div className="space-y-1">
+                  {data.databaseRelations.map((table, idx) => (
+                    <div key={idx} className="p-2 rounded-lg bg-slate-950 border border-slate-800/80 text-[11px] text-blue-400 flex items-center gap-1.5">
+                      <Database className="w-3 h-3" />
+                      <span>{table}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        )}
+
+        {/* TAB 2: SOURCE & API */}
+        {activeTab === 'source' && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-slate-400 uppercase tracking-wider">Source Repository Code</span>
+                {data.path && (
+                  <button
+                    onClick={() => onOpenSource(data.path!)}
+                    className="px-2.5 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-[10px] transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <Code2 className="w-3 h-3" />
+                    <span>Open Code Viewer</span>
+                  </button>
+                )}
+              </div>
+              <p className="text-slate-400 text-xs font-sans">
+                Inspect raw syntax, imports, function exports, and type signatures in the integrated code reader.
+              </p>
+            </div>
+
+            {/* Method & Protocol Info */}
+            <div className="space-y-2">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Protocol Details</span>
+              <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2 text-[11px]">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Method</span>
+                  <span className="text-cyan-400 font-bold">{data.method || 'GET / POST'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Framework</span>
+                  <span className="text-slate-300">{data.framework || 'Node.js / Express'}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500">Language</span>
+                  <span className="text-slate-300">{data.language || 'TypeScript'}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick cURL snippet */}
+            {data.endpoint && (
+              <div className="space-y-1.5">
+                <span className="text-[10px] text-slate-500 uppercase tracking-wider">Example cURL Request</span>
+                <pre className="p-3 rounded-xl bg-black/60 border border-slate-800 text-[10px] text-slate-300 overflow-x-auto">
+                  {`curl -X ${data.method || 'GET'} \\
+  'http://localhost:3000${data.endpoint.replace(/^[A-Z]+\s+/, '')}' \\
+  -H 'Content-Type: application/json'`}
+                </pre>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: SCHEMA & CONTRACTS */}
+        {activeTab === 'schema' && (
+          <div className="space-y-4">
+            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-2">
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+                Security & Authorization Contract
+              </span>
+              <p className="text-slate-300 text-xs font-sans leading-relaxed">
+                {data.category === 'auth'
+                  ? 'Guarded by session token / Bearer JWT headers. CSRF validated.'
+                  : 'Accessible to authenticated internal services with standard project scope.'}
+              </p>
+            </div>
+
+            <div className="space-y-1.5">
+              <span className="text-[10px] text-slate-500 uppercase tracking-wider">Data Model Dependencies</span>
+              {data.dependencies && data.dependencies.length > 0 ? (
+                <div className="space-y-1">
+                  {data.dependencies.map((dep, idx) => (
+                    <div key={idx} className="p-2 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 text-[11px] flex items-center justify-between">
+                      <span>{dep}</span>
+                      <span className="text-slate-500 text-[9px]">dependency</span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-slate-950 border border-slate-900 text-slate-500 text-xs">
+                  No direct external dependencies listed.
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: AI ANALYSIS */}
+        {activeTab === 'ai' && (
+          <div className="space-y-4">
+            <div className="p-4 rounded-2xl bg-purple-950/20 border border-purple-500/30 space-y-3">
+              <div className="flex items-center gap-2 text-purple-300">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span className="text-xs font-bold uppercase tracking-wider">AI Architectural Intelligence</span>
+              </div>
+              <p className="text-xs text-slate-300 font-sans leading-relaxed">
+                Generate an architectural breakdown of this module: data flow, scaling bottlenecks, coupling risks, and interface contracts.
+              </p>
+
+              <button
+                onClick={handleExplain}
+                disabled={isExplaining}
+                className="w-full py-2.5 rounded-xl bg-linear-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-purple-900/40"
+              >
+                {isExplaining ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-white" />
+                    <span>Analyzing Architecture...</span>
+                  </>
+                ) : (
+                  <>
+                    <Cpu className="w-4 h-4 text-cyan-300" />
+                    <span>Run Gemini Architecture Audit</span>
+                  </>
+                )}
               </button>
             </div>
-            <p className="text-xs font-mono text-cyan-300 break-all select-all">
-              {data.endpoint || data.path}
-            </p>
-          </div>
-        )}
 
-        {/* Description */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-mono text-slate-400 uppercase tracking-wider">
-            Description
-          </label>
-          <p className="text-xs text-slate-300 leading-relaxed bg-slate-900/50 p-3 rounded-xl border border-slate-800/80">
-            {data.description || 'Architectural entity detected in repository structure.'}
-          </p>
-        </div>
-
-        {/* Tech Specs */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-            <span className="text-[10px] font-mono text-slate-500 uppercase block">Language</span>
-            <span className="text-xs font-mono text-white font-medium mt-0.5 block truncate">
-              {data.language || 'Standard'}
-            </span>
-          </div>
-
-          <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
-            <span className="text-[10px] font-mono text-slate-500 uppercase block">Framework</span>
-            <span className="text-xs font-mono text-purple-300 font-medium mt-0.5 block truncate">
-              {data.framework || 'Detected Module'}
-            </span>
-          </div>
-        </div>
-
-        {/* Connected Graph Metrics */}
-        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/20 via-purple-950/20 to-slate-900 border border-slate-800 flex items-center justify-between">
-          <div className="text-center flex-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase block">Incoming</span>
-            <span className="text-sm font-bold font-mono text-cyan-400">{upstreamCount} nodes</span>
-          </div>
-          <div className="w-px h-8 bg-slate-800" />
-          <div className="text-center flex-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase block">Outgoing</span>
-            <span className="text-sm font-bold font-mono text-purple-400">{downstreamCount} nodes</span>
-          </div>
-        </div>
-
-        {/* Connected APIs */}
-        {data.connectedApis && data.connectedApis.length > 0 && (
-          <div className="space-y-2">
-            <label className="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Terminal className="w-3.5 h-3.5 text-emerald-400" />
-              Connected APIs ({data.connectedApis.length})
-            </label>
-            <div className="space-y-1">
-              {data.connectedApis.map((api, idx) => (
-                <div
-                  key={idx}
-                  className="px-2.5 py-1.5 rounded-lg bg-emerald-950/30 border border-emerald-800/40 text-emerald-300 font-mono text-xs flex items-center justify-between"
-                >
-                  <span className="truncate">{api}</span>
+            {aiExplanation && (
+              <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 space-y-2 animate-in fade-in duration-200">
+                <span className="text-[10px] text-cyan-400 uppercase tracking-wider font-bold">Analysis Synthesis</span>
+                <div className="text-xs font-sans text-slate-200 leading-relaxed whitespace-pre-line">
+                  {aiExplanation}
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Database Relations */}
-        {data.databaseRelations && data.databaseRelations.length > 0 && (
-          <div className="space-y-2">
-            <label className="text-[11px] font-mono text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Database className="w-3.5 h-3.5 text-blue-400" />
-              Database Relations
-            </label>
-            <div className="flex flex-wrap gap-1.5">
-              {data.databaseRelations.map((rel, idx) => (
-                <span
-                  key={idx}
-                  className="px-2.5 py-1 rounded-lg bg-blue-950/40 border border-blue-800/50 text-blue-300 font-mono text-xs"
-                >
-                  {rel}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* AI Architectural Breakdown */}
-        {aiExplanation && (
-          <div className="space-y-2 p-3.5 rounded-2xl bg-gradient-to-b from-purple-950/40 to-slate-900 border border-purple-500/30">
-            <div className="flex items-center gap-1.5 text-xs font-mono font-semibold text-purple-300">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Patles AI Architectural Analysis</span>
-            </div>
-            <div className="text-xs text-slate-300 space-y-2 whitespace-pre-line leading-relaxed font-sans">
-              {aiExplanation}
-            </div>
+              </div>
+            )}
           </div>
         )}
 
       </div>
-
-      {/* Drawer Action Footer */}
-      <div className="p-4 border-t border-slate-800 bg-[#0B1120] space-y-2">
-        <div className="grid grid-cols-2 gap-2">
-          {data.path ? (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onOpenSource(data.path!)}
-              className="text-xs font-mono w-full"
-            >
-              <FileCode className="w-3.5 h-3.5 mr-1.5 text-cyan-400" />
-              <span>Open Source</span>
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="sm"
-              disabled
-              className="text-xs font-mono w-full opacity-50"
-            >
-              <FileCode className="w-3.5 h-3.5 mr-1.5" />
-              <span>No File Path</span>
-            </Button>
-          )}
-
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onShowConnections(node.id)}
-            className="text-xs font-mono w-full"
-          >
-            <Layers className="w-3.5 h-3.5 mr-1.5 text-indigo-400" />
-            <span>Show Connections</span>
-          </Button>
-        </div>
-
-        <Button
-          variant="gradient"
-          size="sm"
-          onClick={handleExplain}
-          disabled={isExplaining}
-          className="text-xs font-mono w-full shadow-lg shadow-purple-900/40"
-        >
-          {isExplaining ? (
-            <>
-              <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-              <span>Synthesizing Architecture...</span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-3.5 h-3.5 mr-1.5 text-cyan-300" />
-              <span>Explain with AI</span>
-            </>
-          )}
-        </Button>
-      </div>
-
     </div>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { 
   RECENT_ACTIVITIES, 
   AI_TIPS 
@@ -17,8 +18,7 @@ import {
   Plus, 
   Github, 
   Workflow,
-  ShieldCheck, 
-  Bug, 
+  Server,
   Terminal, 
   ExternalLink, 
   Code2, 
@@ -113,7 +113,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     <div className="space-y-8">
       
       {/* 1. Welcome Card */}
-      <div className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-[#0F172A] border border-purple-500/30 shadow-2xl backdrop-blur-xl overflow-hidden">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="relative p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-[#0F172A] border border-purple-500/30 shadow-2xl backdrop-blur-xl overflow-hidden"
+      >
         {/* Ambient background glow */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
@@ -162,10 +168,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* 2. Analytics Cards Grid */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.5, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
+      >
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-base font-bold text-white tracking-tight">
             Developer Metrics & Synthesis Velocity
@@ -178,10 +189,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
             <AnalyticsCard key={metric.id} metric={metric} />
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* 3. Quick Actions Cards */}
-      <div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.15 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+      >
         <h2 className="text-base font-bold text-white tracking-tight mb-4">
           Quick Actions
         </h2>
@@ -218,43 +234,49 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           </button>
 
           <button
-            onClick={() => onNavigate('code-review')}
-            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-emerald-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
+            onClick={() => onNavigate('workflow')}
+            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-indigo-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <Workflow className="w-5 h-5 text-indigo-400" />
             </div>
-            <h3 className="text-sm font-bold text-white group-hover:text-emerald-200">
-              Run Code Review
+            <h3 className="text-sm font-bold text-white group-hover:text-indigo-200">
+              Architecture Workflow
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Scan pull requests for security and bugs
+              Explore interactive graph & system nodes
             </p>
           </button>
 
           <button
-            onClick={() => onNavigate('debugger')}
-            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-rose-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
+            onClick={() => onNavigate('deployment')}
+            className="p-5 rounded-2xl bg-[#0F172A]/70 border border-slate-800 hover:border-blue-500/50 text-left transition-all hover:bg-slate-900 group cursor-pointer"
           >
-            <div className="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
-              <Bug className="w-5 h-5 text-rose-400" />
+            <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <Server className="w-5 h-5 text-blue-400" />
             </div>
-            <h3 className="text-sm font-bold text-white group-hover:text-rose-200">
-              AI Debugger
+            <h3 className="text-sm font-bold text-white group-hover:text-blue-200">
+              Deployment Validator
             </h3>
             <p className="text-xs text-slate-400 mt-1">
-              Paste stack trace for auto-remediation patch
+              Inspect build containers and cluster uptime
             </p>
           </button>
 
         </div>
-      </div>
+      </motion.div>
 
       {/* 4. Live Metrics & Telemetry Dashboard (Active Project Growth & API Usage Trends via Recharts) */}
       <MetricsDashboard projects={projects} />
 
       {/* 5. Split Section: Recent Projects Table & AI Activity Timeline + Tips */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.1 }}
+        transition={{ duration: 0.5, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+        className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
+      >
         
         {/* Left Side: Recent Projects Table (8 Cols) */}
         <div className="lg:col-span-8 space-y-4">
@@ -450,7 +472,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
         </div>
 
-      </div>
+      </motion.div>
 
       {/* Project Inspector Modal */}
       {selectedProject && (

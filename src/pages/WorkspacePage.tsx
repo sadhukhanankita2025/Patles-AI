@@ -11,10 +11,7 @@ import {
   Trash2, 
   Search, 
   Terminal as TerminalIcon, 
-  Sparkles, 
-  Send, 
-  ExternalLink, 
-  Loader2, 
+  Loader2,
   AlertCircle, 
   ChevronRight, 
   ChevronDown,
@@ -52,16 +49,6 @@ export const WorkspacePage: React.FC<WorkspacePageProps> = ({
   // File creation & deletion modals
   const [isCreatingFile, setIsCreatingFile] = useState<boolean>(false);
   const [newFilePath, setNewFilePath] = useState<string>('');
-
-  // AI Assistant state
-  const [assistantMessages, setAssistantMessages] = useState<Array<{ sender: 'user' | 'ai'; text: string; relevantFiles?: string[] }>>([
-    {
-      sender: 'ai',
-      text: `Hello! I am your Project Assistant for **${activeProject?.name || 'this project'}**. Ask me about API routes, component data flows, or file roles.`
-    }
-  ]);
-  const [assistantInput, setAssistantInput] = useState<string>('');
-  const [isAssistantThinking, setIsAssistantThinking] = useState<boolean>(false);
 
   // Terminal state
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
@@ -202,44 +189,6 @@ export const WorkspacePage: React.FC<WorkspacePageProps> = ({
       }
     } catch (err) {
       console.error('Delete failed:', err);
-    }
-  };
-
-  // AI Assistant Ask
-  const handleSendAssistant = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!assistantInput.trim()) return;
-
-    const userMsg = assistantInput.trim();
-    setAssistantMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
-    setAssistantInput('');
-    setIsAssistantThinking(true);
-
-    try {
-      const res = await fetch(`/api/projects/${activeProjectId}/assistant`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          question: userMsg,
-          activeFile: activeFilePath
-        })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setAssistantMessages(prev => [
-          ...prev,
-          {
-            sender: 'ai',
-            text: data.answer,
-            relevantFiles: data.relevantFiles
-          }
-        ]);
-      }
-    } catch (err) {
-      console.error('Assistant error:', err);
-    } finally {
-      setIsAssistantThinking(false);
     }
   };
 
@@ -494,98 +443,6 @@ export const WorkspacePage: React.FC<WorkspacePageProps> = ({
               />
             </form>
           </div>
-
-        </div>
-
-        {/* RIGHT COLUMN: AI ASSISTANT (Width 80 / 320px) */}
-        <div className="w-80 bg-[#090D17] border-l border-slate-800 flex flex-col shrink-0">
-          <div className="p-3 border-b border-slate-800 flex items-center justify-between">
-            <span className="font-bold text-white flex items-center gap-1.5 text-xs">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              Project AI Assistant
-            </span>
-            <span className="text-[10px] text-purple-400 font-mono">Gemini 3.8</span>
-          </div>
-
-          {/* Quick Prompts */}
-          <div className="p-2 border-b border-slate-800 flex flex-wrap gap-1">
-            {[
-              'Explain this file',
-              'How does login work?',
-              'Where is appointment API?'
-            ].map((qp, i) => (
-              <button
-                key={i}
-                onClick={() => setAssistantInput(qp)}
-                className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 cursor-pointer"
-              >
-                {qp}
-              </button>
-            ))}
-          </div>
-
-          {/* Messages Scroll Area */}
-          <div className="flex-1 overflow-y-auto p-3 space-y-3">
-            {assistantMessages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`p-3 rounded-xl text-xs space-y-2 ${
-                  msg.sender === 'user'
-                    ? 'bg-purple-900/30 border border-purple-500/30 text-white ml-4'
-                    : 'bg-slate-900 border border-slate-800 text-slate-200 mr-2'
-                }`}
-              >
-                <div className="leading-relaxed whitespace-pre-wrap font-sans">
-                  {msg.text}
-                </div>
-
-                {/* Clickable file links */}
-                {msg.relevantFiles && msg.relevantFiles.length > 0 && (
-                  <div className="pt-2 border-t border-slate-800/80 space-y-1">
-                    <span className="text-[10px] text-slate-500 font-bold block">Referenced Files:</span>
-                    {msg.relevantFiles.map((rf, i) => (
-                      <button
-                        key={i}
-                        onClick={() => loadFileContent(rf)}
-                        className="text-[10px] text-cyan-400 hover:underline flex items-center gap-1 font-mono text-left"
-                      >
-                        <ExternalLink className="w-2.5 h-2.5 shrink-0" />
-                        <span>{rf}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {isAssistantThinking && (
-              <div className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs flex items-center gap-2">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-cyan-400" />
-                Thinking with project context...
-              </div>
-            )}
-          </div>
-
-          {/* Question Input */}
-          <form onSubmit={handleSendAssistant} className="p-3 border-t border-slate-800 bg-[#0B1120]">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Ask about this project..."
-                value={assistantInput}
-                onChange={(e) => setAssistantInput(e.target.value)}
-                disabled={isAssistantThinking}
-                className="w-full pl-3 pr-8 py-2 bg-slate-950 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-500"
-              />
-              <button
-                type="submit"
-                disabled={isAssistantThinking || !assistantInput.trim()}
-                className="absolute right-2 top-2 text-purple-400 hover:text-white disabled:opacity-40"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </form>
 
         </div>
 

@@ -368,7 +368,13 @@ Ready to preview: http://localhost:3000/preview`
         {/* ========================================================
             INTERACTIVE IDE & LIVE SYNTHESIS WORKBENCH
             ======================================================== */}
-        <div className="mt-14 max-w-5xl mx-auto rounded-3xl bg-[#0F172A]/90 border border-slate-700/80 shadow-2xl shadow-purple-950/30 overflow-hidden backdrop-blur-2xl text-left">
+        <motion.div 
+          initial={{ opacity: 0, y: 35 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.1 }}
+          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          className="mt-14 max-w-5xl mx-auto rounded-3xl bg-[#0F172A]/90 border border-slate-700/80 shadow-2xl shadow-purple-950/30 overflow-hidden backdrop-blur-2xl text-left"
+        >
           
           {/* Top Window Bar & Nav Tabs */}
           <div className="px-4 py-3 bg-[#0B1120] border-b border-slate-800 flex flex-wrap items-center justify-between gap-3">
@@ -614,10 +620,16 @@ Ready to preview: http://localhost:3000/preview`
               </button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* Modern Tech Ecosystem Row (Linear / Vercel style) */}
-        <div className="mt-16 pt-8 border-t border-slate-800/80 max-w-4xl mx-auto">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mt-16 pt-8 border-t border-slate-800/80 max-w-4xl mx-auto"
+        >
           <p className="text-xs uppercase tracking-widest text-slate-400 font-mono text-center mb-6">
             Architected with modern open-source foundations
           </p>
@@ -630,7 +642,7 @@ Ready to preview: http://localhost:3000/preview`
             <span className="font-bold text-sm tracking-tight text-slate-300 font-mono">Docker</span>
             <span className="font-bold text-sm tracking-tight text-slate-300 font-mono">Vite</span>
           </div>
-        </div>
+        </motion.div>
 
       </div>
     </section>

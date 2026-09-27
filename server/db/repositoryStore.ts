@@ -313,12 +313,19 @@ class RepositoryStore {
 
   // Files
   async getFiles(repositoryId: string): Promise<RepositoryFileRow[]> {
-    return this.files.get(repositoryId) || [];
+    const list = this.files.get(repositoryId) || [];
+    const allPaths = new Set(list.map(f => f.path));
+    // Filter out entries that are parent directories of other files
+    return list.filter(f => {
+      if (f.path.endsWith('/')) return false;
+      const isDir = Array.from(allPaths).some(other => other !== f.path && other.startsWith(f.path + '/'));
+      return !isDir;
+    });
   }
 
   async getFileById(fileId: string): Promise<RepositoryFileRow | null> {
     for (const fileList of this.files.values()) {
-      const found = fileList.find(f => f.id === fileId);
+      const found = fileList.find(f => f.id === fileId || f.path === fileId);
       if (found) return found;
     }
     return null;

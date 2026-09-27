@@ -18,6 +18,11 @@
     --font-mono: 'JetBrains Mono', monospace;
   }
 
+  html {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
   body {
     font-family: var(--font-sans);
     background-color: #050816;
@@ -38,10 +43,10 @@
     scroll-margin-top: 5rem;
   }
 
-  /* Custom scrollbar for dark aesthetic */
+  /* Custom scrollbar for dark aesthetic with futuristic neon hint */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 7px;
+    height: 7px;
   }
   ::-webkit-scrollbar-track {
     background: #050816;
@@ -49,9 +54,25 @@
   ::-webkit-scrollbar-thumb {
     background: #1E293B;
     border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #334155;
+    background: #3B4261;
+    border-color: rgba(168, 85, 247, 0.4);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }
 

@@ -45,6 +45,9 @@ export interface WorkflowNodeData {
   isDimmed?: boolean;
   isHighlighted?: boolean;
   isSelected?: boolean;
+  inboundCount?: number;
+  outboundCount?: number;
+  connectionRole?: 'focus' | 'inbound' | 'outbound' | null;
 }
 
 export interface WorkflowNodeItem {
@@ -68,6 +71,7 @@ export interface WorkflowEdgeItem {
   style?: Record<string, any>;
   isDimmed?: boolean;
   isHighlighted?: boolean;
+  connectionType?: 'inbound' | 'outbound' | 'normal';
 }
 
 export interface WorkflowGraphResponse {

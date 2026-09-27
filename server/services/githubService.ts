@@ -85,7 +85,17 @@ const IGNORED_EXTENSIONS = [
   '.exe', '.dll', '.so', '.dylib', '.bin',
   '.woff', '.woff2', '.ttf', '.eot',
   '.pyc', '.class', '.jar',
-  '.lock', '-lock.json', '.lockb'
+  '.lock', '.lockb', '.map'
+];
+
+const IGNORED_FILES = [
+  'package-lock.json',
+  'yarn.lock',
+  'pnpm-lock.yaml',
+  'cargo.lock',
+  'composer.lock',
+  'poetry.lock',
+  'gemfile.lock'
 ];
 
 export class GitHubService {
@@ -237,8 +247,12 @@ export class GitHubService {
         }
       }
 
-      // If it's a file, ignore binary/media extensions
+      // If it's a file, ignore binary/media extensions and huge lockfiles
       if (item.type === 'blob') {
+        const basename = path.basename(p).toLowerCase();
+        if (IGNORED_FILES.includes(basename)) {
+          return false;
+        }
         const ext = path.extname(p).toLowerCase();
         if (IGNORED_EXTENSIONS.includes(ext)) {
           return false;
@@ -250,30 +264,37 @@ export class GitHubService {
   }
 
   /**
-   * Retrieve file contents
+   * Retrieve file contents with resilient multi-branch fallback
    */
   async getFile(owner: string, repo: string, filePath: string, branch: string = 'main'): Promise<string> {
-    // Attempt raw user content first for speed
-    const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${filePath}`;
-    try {
-      const rawRes = await fetch(rawUrl, { headers: this.getHeaders() });
-      if (rawRes.ok) {
-        return await rawRes.text();
+    // Attempt raw user content first across candidate branches for speed & no rate-limit
+    const candidateBranches = Array.from(new Set([branch, 'main', 'master', 'HEAD', 'dev', 'develop']));
+    for (const b of candidateBranches) {
+      const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/${b}/${filePath}`;
+      try {
+        const rawRes = await fetch(rawUrl, { headers: this.getHeaders() });
+        if (rawRes.ok) {
+          return await rawRes.text();
+        }
+      } catch {
+        // Continue to next candidate
       }
-    } catch {
-      // Fallback to GitHub API
     }
 
     // Fallback: GitHub API contents
-    const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${branch}`;
-    const apiRes = await fetch(apiUrl, { headers: this.getHeaders() });
-    if (!apiRes.ok) {
-      throw new Error(`File ${filePath} not found in ${owner}/${repo}`);
-    }
-
-    const data: any = await apiRes.json();
-    if (data.content && data.encoding === 'base64') {
-      return Buffer.from(data.content, 'base64').toString('utf-8');
+    for (const b of candidateBranches.slice(0, 2)) {
+      try {
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${filePath}?ref=${b}`;
+        const apiRes = await fetch(apiUrl, { headers: this.getHeaders() });
+        if (apiRes.ok) {
+          const data: any = await apiRes.json();
+          if (data.content && data.encoding === 'base64') {
+            return Buffer.from(data.content, 'base64').toString('utf-8');
+          }
+        }
+      } catch {
+        // Non-blocking
+      }
     }
 
     return '';

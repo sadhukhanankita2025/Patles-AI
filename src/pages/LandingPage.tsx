@@ -1,10 +1,47 @@
 import React, { useState } from 'react';
+import { motion, Variants } from 'framer-motion';
 import { Hero } from '../components/Hero';
 import { TemplateCard } from '../components/TemplateCard';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/Button';
 import { TEMPLATES } from '../data/mockData';
 import { TemplateItem, PageView } from '../types';
+
+// High-performance Framer Motion scroll animation variants
+const sectionVariants: Variants = {
+  hidden: { opacity: 0, y: 35 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.65,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
+
+const staggerContainer: Variants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.1,
+    },
+  },
+};
+
+const childCardVariants: Variants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.5,
+      ease: [0.16, 1, 0.3, 1],
+    },
+  },
+};
 import { 
   Sparkles, 
   ArrowRight, 
@@ -96,7 +133,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   ];
 
   return (
-    <div className="relative bg-transparent text-slate-100 overflow-hidden">
+    <div className="relative bg-transparent text-slate-100 overflow-x-clip">
       
       {/* 1. Hero Section (with Live Workbench & Cosmic Atmosphere) */}
       <Hero
@@ -110,7 +147,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* ========================================================
           2. ASYMMETRIC BENTO GRID: THE ENGINE OF PATLES.AI
           ======================================================== */}
-      <section id="features" className="py-24 border-t border-slate-800/80 relative bg-[#060818]/50 backdrop-blur-md">
+      <motion.section 
+        id="features" 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.12 }}
+        className="py-24 border-t border-slate-800/80 relative bg-[#060818]/50 backdrop-blur-md"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Section Header with Clean Typographic Kicker */}
@@ -128,10 +172,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Asymmetric Bento Layout with Smooth Hover Lift & Dynamic Lighting */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
             
             {/* Bento 1: 2-Column Marquee - Multi-File Code Synthesis & Live Diff */}
-            <div className="md:col-span-2 p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col justify-between group">
+            <motion.div 
+              variants={childCardVariants}
+              className="md:col-span-2 p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-purple-950/40 flex flex-col justify-between group"
+            >
               <div className="absolute top-0 right-0 w-80 h-80 bg-purple-600/15 rounded-full blur-3xl pointer-events-none animate-cosmic-pulse" />
               
               <div>
@@ -173,10 +226,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <div className="text-slate-400">{'}'});</div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Bento 2: 1-Column - Relational PostgreSQL & Drizzle Schema */}
-            <div className="p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-cyan-950/40 flex flex-col justify-between group">
+            <motion.div 
+              variants={childCardVariants}
+              className="p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-cyan-950/40 flex flex-col justify-between group"
+            >
               <div className="absolute top-0 right-0 w-60 h-60 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none animate-cosmic-pulse" />
 
               <div>
@@ -205,10 +261,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <span className="text-emerald-400">FK → patients.id</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Bento 3: 1-Column - Zero-Hallucination AST Guard */}
-            <div className="p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-950/40 flex flex-col justify-between group">
+            <motion.div 
+              variants={childCardVariants}
+              className="p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-950/40 flex flex-col justify-between group"
+            >
               <div>
                 <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 mb-4 group-hover:scale-110 transition-transform">
                   <ShieldCheck className="w-5 h-5" />
@@ -241,10 +300,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   </span>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Bento 4: 1-Column - Deterministic Compilers */}
-            <div className="p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-amber-950/40 flex flex-col justify-between group">
+            <motion.div 
+              variants={childCardVariants}
+              className="p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-amber-950/40 flex flex-col justify-between group"
+            >
               <div>
                 <div className="w-10 h-10 rounded-2xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 mb-4 group-hover:scale-110 transition-transform">
                   <Zap className="w-5 h-5" />
@@ -264,10 +326,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <div className="text-xs text-slate-400 mt-1">First-turn TypeScript compile pass rate</div>
               </div>
-            </div>
+            </motion.div>
 
             {/* Bento 5: 2-Column - 1-Click Export & Edge Deploy */}
-            <div className="md:col-span-2 p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-cyan-950/40 flex flex-col justify-between group">
+            <motion.div 
+              variants={childCardVariants}
+              className="md:col-span-2 p-7 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 backdrop-blur-xl relative overflow-hidden transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-cyan-950/40 flex flex-col justify-between group"
+            >
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <div className="w-10 h-10 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 mb-4 group-hover:scale-110 transition-transform">
@@ -301,17 +366,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </div>
                 <span className="text-[11px] text-slate-400 shrink-0 ml-2">Standard Node.js / Vite</span>
               </div>
-            </div>
+            </motion.div>
 
-          </div>
+          </motion.div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================
           3. HOW IT WORKS: INTERACTIVE 3-STEP ARCHITECTURE PIPELINE
           ======================================================== */}
-      <section className="py-24 border-t border-slate-800/80 relative">
+      <motion.section 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        className="py-24 border-t border-slate-800/80 relative"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-3xl mx-auto mb-16">
@@ -328,8 +399,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Interactive Step Switcher Tabs */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            <button
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
+          >
+            <motion.button
+              variants={childCardVariants}
               onClick={() => setActivePipelineStep(1)}
               className={`p-5 rounded-2xl text-left border transition-all ${
                 activePipelineStep === 1
@@ -342,9 +420,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-xs text-slate-400 mt-1">
                 Extracts data models, endpoints, UI routes, and security invariants from natural language.
               </p>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              variants={childCardVariants}
               onClick={() => setActivePipelineStep(2)}
               className={`p-5 rounded-2xl text-left border transition-all ${
                 activePipelineStep === 2
@@ -357,9 +436,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-xs text-slate-400 mt-1">
                 Generates modular React 19 components, Tailwind design systems, and Express APIs in parallel.
               </p>
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
+              variants={childCardVariants}
               onClick={() => setActivePipelineStep(3)}
               className={`p-5 rounded-2xl text-left border transition-all ${
                 activePipelineStep === 3
@@ -372,8 +452,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <p className="text-xs text-slate-400 mt-1">
                 Verifies TypeScript compilation, runs invariant tests, and produces clean Docker export files.
               </p>
-            </button>
-          </div>
+            </motion.button>
+          </motion.div>
 
           {/* Active Step Details Panel */}
           <div className="p-6 sm:p-8 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl">
@@ -475,12 +555,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================
           4. ARCHITECTURAL TEMPLATES SHOWCASE
           ======================================================== */}
-      <section id="templates" className="py-24 border-t border-slate-800/80 bg-[#070B19]/50 relative">
+      <motion.section 
+        id="templates" 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.08 }}
+        className="py-24 border-t border-slate-800/80 bg-[#070B19]/50 relative"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
@@ -516,24 +603,38 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
           {/* Templates Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.05 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
             {filteredTemplates.map((template) => (
-              <TemplateCard
-                key={template.id}
-                template={template}
-                onUseTemplate={handleUseTemplate}
-                onPreview={(tmpl) => setSelectedTemplate(tmpl)}
-              />
+              <motion.div key={template.id} variants={childCardVariants}>
+                <TemplateCard
+                  template={template}
+                  onUseTemplate={handleUseTemplate}
+                  onPreview={(tmpl) => setSelectedTemplate(tmpl)}
+                />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================
           5. OFFICIAL BRAND IDENTITY & 3-PETAL LOTUS JEWEL
           ======================================================== */}
-      <section id="brand" className="py-24 border-t border-slate-800/80 relative overflow-hidden bg-transparent">
+      <motion.section 
+        id="brand" 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.12 }}
+        className="py-24 border-t border-slate-800/80 relative overflow-hidden bg-transparent"
+      >
         {/* Subtle Cosmic Nebula Glow behind Brand Stage */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-gradient-to-r from-purple-600/15 via-indigo-600/10 to-cyan-500/15 rounded-full blur-[140px] pointer-events-none" />
 
@@ -555,7 +656,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
             {/* Left 5 Cols: Visual Lotus with Neon Cosmic Bloom & Floating Levitation */}
-            <div className="lg:col-span-5 flex flex-col items-center justify-center p-8 sm:p-12 rounded-3xl bg-[#0B1120]/90 border border-purple-500/30 shadow-2xl shadow-purple-950/40 relative overflow-hidden group animate-float-gentle">
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.94 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-5 flex flex-col items-center justify-center p-8 sm:p-12 rounded-3xl bg-[#0B1120]/90 border border-purple-500/30 shadow-2xl shadow-purple-950/40 relative overflow-hidden group animate-float-gentle"
+            >
               <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-purple-600/25 rounded-full blur-[80px] pointer-events-none animate-cosmic-pulse" />
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 bg-cyan-500/20 rounded-full blur-[60px] pointer-events-none animate-float-reverse" />
@@ -573,13 +680,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping" />
                 <span>Vector SVG · 3-Petal Cosmic Lotus Architecture</span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Right 7 Cols: The 3 Petal Pillars with Instant Palette Copying */}
-            <div className="lg:col-span-7 space-y-4">
+            <motion.div 
+              variants={staggerContainer}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, amount: 0.1 }}
+              className="lg:col-span-7 space-y-4"
+            >
               
               {/* Petal 1: Left */}
-              <div className="p-5 rounded-2xl bg-slate-900/80 border border-pink-500/30 flex items-start justify-between gap-4 hover:border-pink-500/60 transition-all">
+              <motion.div 
+                variants={childCardVariants}
+                className="p-5 rounded-2xl bg-slate-900/80 border border-pink-500/30 flex items-start justify-between gap-4 hover:border-pink-500/60 transition-all"
+              >
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-pink-500/20 border border-pink-500/40 flex items-center justify-center text-pink-400 shrink-0 mt-0.5">
                     <Feather className="w-5 h-5" />
@@ -605,10 +721,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {copiedColor === 'pink' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span className="hidden sm:inline">Palette</span>
                 </button>
-              </div>
+              </motion.div>
 
               {/* Petal 2: Center */}
-              <div className="p-5 rounded-2xl bg-slate-900/80 border border-purple-500/30 flex items-start justify-between gap-4 hover:border-purple-500/60 transition-all">
+              <motion.div 
+                variants={childCardVariants}
+                className="p-5 rounded-2xl bg-slate-900/80 border border-purple-500/30 flex items-start justify-between gap-4 hover:border-purple-500/60 transition-all"
+              >
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 shrink-0 mt-0.5">
                     <Cpu className="w-5 h-5" />
@@ -634,10 +753,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {copiedColor === 'purple' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span className="hidden sm:inline">Palette</span>
                 </button>
-              </div>
+              </motion.div>
 
               {/* Petal 3: Right */}
-              <div className="p-5 rounded-2xl bg-slate-900/80 border border-cyan-500/30 flex items-start justify-between gap-4 hover:border-cyan-500/60 transition-all">
+              <motion.div 
+                variants={childCardVariants}
+                className="p-5 rounded-2xl bg-slate-900/80 border border-cyan-500/30 flex items-start justify-between gap-4 hover:border-cyan-500/60 transition-all"
+              >
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shrink-0 mt-0.5">
                     <Binary className="w-5 h-5" />
@@ -663,7 +785,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {copiedColor === 'cyan' ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   <span className="hidden sm:inline">Palette</span>
                 </button>
-              </div>
+              </motion.div>
 
               {/* Brand Actions Row */}
               <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -685,16 +807,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 </a>
               </div>
 
-            </div>
+            </motion.div>
           </div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================
           6. COMPARISON MATRIX: PATLES.AI VS GENERIC AI CHATBOTS
           ======================================================== */}
-      <section className="py-24 border-t border-slate-800/80 relative bg-[#070B19]/50">
+      <motion.section 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.12 }}
+        className="py-24 border-t border-slate-800/80 relative bg-[#070B19]/50"
+      >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-16">
@@ -706,7 +834,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="rounded-3xl bg-slate-900/90 border border-slate-800 overflow-hidden shadow-2xl backdrop-blur-xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            className="rounded-3xl bg-slate-900/90 border border-slate-800 overflow-hidden shadow-2xl backdrop-blur-xl"
+          >
             <div className="grid grid-cols-12 bg-slate-950 p-4 border-b border-slate-800 text-xs font-mono text-slate-400">
               <div className="col-span-6 sm:col-span-5 font-semibold text-slate-200">Capabilities</div>
               <div className="col-span-3 sm:col-span-4 text-center font-bold text-cyan-400">Patles.ai</div>
@@ -754,40 +888,58 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <div className="col-span-3 sm:col-span-3 text-center text-slate-400">Manual setup required</div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================
           7. QUANTITATIVE PROOF & ATTRIBUTABLE TESTIMONIALS
           ======================================================== */}
-      <section className="py-24 border-t border-slate-800/80 relative">
+      <motion.section 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        className="py-24 border-t border-slate-800/80 relative"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Quantitative Precision Numbers */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20">
-            <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-20"
+          >
+            <motion.div variants={childCardVariants} className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
               <div className="text-3xl sm:text-4xl font-extrabold text-white font-mono tabular-nums">14,200+</div>
               <div className="mt-1 text-xs text-slate-400">Full-Stack Repos Generated</div>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
+            </motion.div>
+            <motion.div variants={childCardVariants} className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
               <div className="text-3xl sm:text-4xl font-extrabold text-white font-mono tabular-nums">99.4%</div>
               <div className="mt-1 text-xs text-slate-400">First-Turn TypeScript Pass</div>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
+            </motion.div>
+            <motion.div variants={childCardVariants} className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
               <div className="text-3xl sm:text-4xl font-extrabold text-white font-mono tabular-nums">1.4s</div>
               <div className="mt-1 text-xs text-slate-400">Average Scaffold Duration</div>
-            </div>
-            <div className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
+            </motion.div>
+            <motion.div variants={childCardVariants} className="p-6 rounded-2xl bg-slate-900/70 border border-slate-800 text-center">
               <div className="text-3xl sm:text-4xl font-extrabold text-white font-mono tabular-nums">0</div>
               <div className="mt-1 text-xs text-slate-400">Hallucinated Packages Allowed</div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* Attributable Developer Testimonials */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.1 }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          >
+            <motion.div variants={childCardVariants} className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
               <p className="text-sm text-slate-200 leading-relaxed italic">
                 "We scaffolded our entire clinical telemetry portal on Patles.ai in an afternoon. Having the Drizzle schema and Express router generated with zero type errors saved our engineering team three weeks."
               </p>
@@ -800,9 +952,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <p className="text-[11px] text-slate-400">VP Engineering, Pulse Health Systems</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
+            <motion.div variants={childCardVariants} className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
               <p className="text-sm text-slate-200 leading-relaxed italic">
                 "The biggest differentiator is the AST import validator. Other tools spit out non-existent npm modules that break on install. Patles.ai gave us a repository that passed `npm install && npm run build` on the very first try."
               </p>
@@ -815,9 +967,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <p className="text-[11px] text-slate-400">Staff Architect, Meridian Cloud</p>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
+            <motion.div variants={childCardVariants} className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-4">
               <p className="text-sm text-slate-200 leading-relaxed italic">
                 "The 3-petal lotus branding and cosmic aesthetic match the quality of the underlying code. It genuinely feels like the developer tool from 2030."
               </p>
@@ -830,16 +982,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <p className="text-[11px] text-slate-400">Founder, Aura Headless Commerce</p>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================
           8. DEVELOPER FAQ ACCORDION
           ======================================================== */}
-      <section className="py-24 border-t border-slate-800/80 relative bg-[#070B19]/50">
+      <motion.section 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.1 }}
+        className="py-24 border-t border-slate-800/80 relative bg-[#070B19]/50"
+      >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center max-w-2xl mx-auto mb-14">
@@ -851,12 +1009,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </p>
           </div>
 
-          <div className="space-y-4">
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.08 }}
+            className="space-y-4"
+          >
             {faqs.map((faq, idx) => {
               const isOpen = openFaqIndex === idx;
               return (
-                <div
+                <motion.div
                   key={idx}
+                  variants={childCardVariants}
                   className="rounded-2xl bg-slate-900/80 border border-slate-800 overflow-hidden transition-all"
                 >
                   <button
@@ -875,18 +1040,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       {faq.a}
                     </div>
                   )}
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* ========================================================
           9. GRAND COSMIC FOOTER CTA
           ======================================================== */}
-      <section className="py-28 border-t border-slate-800/80 relative overflow-hidden bg-[#050816]">
+      <motion.section 
+        variants={sectionVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.15 }}
+        className="py-28 border-t border-slate-800/80 relative overflow-hidden bg-[#050816]"
+      >
         <div className="absolute inset-0 bg-radial-glow opacity-80 pointer-events-none" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[140px] pointer-events-none" />
 
@@ -933,7 +1104,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </div>
 
         </div>
-      </section>
+      </motion.section>
 
       {/* Template Preview Modal */}
       {selectedTemplate && (

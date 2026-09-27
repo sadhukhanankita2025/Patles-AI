@@ -50,18 +50,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         return 'AI Project Generator';
       case 'workspace':
         return 'Repositories & Workspaces';
-      case 'ai-chat':
-        return 'AI Architecture Assistant';
-      case 'code-review':
-        return 'Security & Code Review';
-      case 'debugger':
-        return 'AI Debugger & Root Cause Analysis';
       case 'deployment':
         return 'CI/CD & Deployment Validator';
       case 'documentation':
         return 'Automated Documentation Hub';
       case 'github-import':
-        return 'GitHub Repository Importer';
+      case 'github':
+        return 'GitHub Intelligence';
+      case 'workflow':
+        return 'Architecture Workflow';
       case 'profile':
         return 'Developer Profile & Settings';
       default:
@@ -120,7 +117,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       )}
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-y-auto">
+      <div 
+        ref={contentRef}
+        className="flex-1 flex flex-col min-w-0 overflow-y-auto scroll-smooth relative"
+      >
+        {/* Scroll Progress Bar for Dashboard Workspace */}
+        <ScrollProgressBar containerRef={contentRef} />
         
         {/* Top Header / Search Bar Contract */}
         <header className="sticky top-0 z-20 h-16 bg-[#0B1120]/85 backdrop-blur-xl border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
@@ -172,7 +174,6 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
             </div>
 
             <button
-              onClick={() => onNavigate('ai-chat')}
               className="p-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors relative"
               title="Notifications"
             >
@@ -216,6 +217,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
           {children}
         </main>
+
+        {/* Scroll To Top Button for Dashboard Viewport */}
+        <ScrollToTopButton containerRef={contentRef} threshold={220} />
       </div>
     </div>
   );
