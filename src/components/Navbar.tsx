@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Menu, X, ArrowRight, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Menu, X, ArrowRight, Sparkles, LogOut, User } from 'lucide-react';
 import { Button } from './Button';
 import { PageView } from '../types';
 import { PatlesLotusLogo } from './PatlesLotusLogo';
+import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   currentPage: PageView;
@@ -16,16 +18,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const navLinks = [
     { label: 'Home', page: 'landing' as PageView, href: '#' },
@@ -61,7 +60,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Zone 1: Official Patles.ai 3-Petal Lotus Brand Wordmark */}
         <button
           onClick={() => onNavigate('landing')}
-          className="flex items-center text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-xl p-1.5 transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          className="flex items-center text-left group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-400 rounded-xl p-1.5 transition-transform hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
           aria-label="Patles.ai Home"
         >
           <PatlesLotusLogo variant="horizontal" size="md" glow={true} animated={true} />
@@ -73,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <button
               key={item.label}
               onClick={() => handleNavClick(item.page, item.href)}
-              className={`hover:text-white transition-colors duration-150 py-1 relative ${
+              className={`hover:text-white transition-colors duration-150 py-1 relative cursor-pointer ${
                 currentPage === item.page && (!item.href || item.href === '#') 
                   ? 'text-white font-semibold' 
                   : 'text-slate-400'
@@ -89,22 +88,57 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Zone 3: Primary Actions */}
         <div className="hidden md:flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onOpenAuth('login')}
-            className="text-slate-300 hover:text-white"
-          >
-            Login
-          </Button>
-          <Button
-            variant="gradient"
-            size="sm"
-            onClick={() => onNavigate('ai-builder')}
-            rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
-          >
-            Start Building
-          </Button>
+          {isAuthenticated ? (
+            <div className="flex items-center gap-2.5">
+              <button
+                onClick={() => onNavigate('dashboard')}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 hover:border-purple-500/40 text-xs text-slate-200 transition-all cursor-pointer"
+              >
+                <div className="w-5 h-5 rounded-full bg-gradient-to-tr from-purple-500 to-cyan-500 flex items-center justify-center font-bold text-white text-[10px]">
+                  {(user?.name || user?.email || 'D').charAt(0).toUpperCase()}
+                </div>
+                <span className="font-semibold text-white max-w-[120px] truncate">
+                  {user?.name || user?.email?.split('@')[0] || 'Console'}
+                </span>
+              </button>
+
+              <Button
+                variant="gradient"
+                size="sm"
+                onClick={() => onNavigate('dashboard')}
+                className="text-xs"
+              >
+                Dashboard
+              </Button>
+
+              <button
+                onClick={handleLogout}
+                className="p-2 rounded-xl bg-slate-900/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-300 border border-slate-800 hover:border-rose-500/30 transition-colors cursor-pointer"
+                title="Sign Out"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
+            </div>
+          ) : (
+            <>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onOpenAuth('login')}
+                className="text-slate-300 hover:text-white"
+              >
+                Login
+              </Button>
+              <Button
+                variant="gradient"
+                size="sm"
+                onClick={() => onNavigate('ai-builder')}
+                rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+              >
+                Start Building
+              </Button>
+            </>
+          )}
         </div>
 
         {/* Mobile menu trigger */}
@@ -112,10 +146,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <Button
             variant="gradient"
             size="sm"
-            onClick={() => onNavigate('ai-builder')}
+            onClick={() => onNavigate(isAuthenticated ? 'dashboard' : 'ai-builder')}
             className="text-xs px-2.5 py-1.5"
           >
-            Build
+            {isAuthenticated ? 'Console' : 'Build'}
           </Button>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -144,32 +178,63 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="pt-3 border-t border-slate-800 flex flex-col gap-2">
-            <Button
-              variant="outline"
-              size="md"
-              fullWidth
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAuth('login');
-              }}
-            >
-              Sign In to Patles
-            </Button>
-            <Button
-              variant="gradient"
-              size="md"
-              fullWidth
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenAuth('signup');
-              }}
-            >
-              Create Account
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <div className="text-xs text-slate-400 px-3 py-1 font-mono">
+                  Signed in as <span className="text-purple-300">{user?.email}</span>
+                </div>
+                <Button
+                  variant="gradient"
+                  size="md"
+                  fullWidth
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onNavigate('dashboard');
+                  }}
+                >
+                  Go to Dashboard
+                </Button>
+                <Button
+                  variant="outline"
+                  size="md"
+                  fullWidth
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    handleLogout();
+                  }}
+                >
+                  Sign Out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="outline"
+                  size="md"
+                  fullWidth
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAuth('login');
+                  }}
+                >
+                  Sign In to Patles
+                </Button>
+                <Button
+                  variant="gradient"
+                  size="md"
+                  fullWidth
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    onOpenAuth('signup');
+                  }}
+                >
+                  Create Account
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
     </header>
   );
 };
-

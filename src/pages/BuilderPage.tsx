@@ -169,6 +169,7 @@ export const BuilderPage: React.FC<BuilderPageProps> = ({
       // Step 3: Call Server API
       const response = await fetch('/api/projects/generate', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: prompt.trim(),

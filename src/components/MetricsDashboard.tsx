@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -14,9 +14,6 @@ import {
   ComposedChart
 } from 'recharts';
 import {
-  PROJECT_GROWTH_7D,
-  PROJECT_GROWTH_30D,
-  PROJECT_GROWTH_90D,
   API_USAGE_7D,
   API_USAGE_30D,
   API_USAGE_90D,
@@ -24,6 +21,7 @@ import {
   ProjectGrowthDataPoint,
   ApiUsageDataPoint
 } from '../data/metricsData';
+import { ProjectSummary } from '../context/ProjectContext';
 import {
   TrendingUp,
   Activity,
@@ -43,15 +41,44 @@ type Timeframe = '7D' | '30D' | '90D';
 type ProjectChartMode = 'cumulative' | 'breakdown' | 'velocity';
 type ApiChartMode = 'models' | 'tokensLatency';
 
-export const MetricsDashboard: React.FC = () => {
+interface MetricsDashboardProps {
+  projects: ProjectSummary[];
+}
+
+export const MetricsDashboard: React.FC<MetricsDashboardProps> = ({ projects }) => {
   const [timeframe, setTimeframe] = useState<Timeframe>('30D');
   const [projectChartMode, setProjectChartMode] = useState<ProjectChartMode>('cumulative');
   const [apiChartMode, setApiChartMode] = useState<ApiChartMode>('models');
 
   // Select project data based on timeframe
-  const projectData: ProjectGrowthDataPoint[] = 
-    timeframe === '7D' ? PROJECT_GROWTH_7D :
-    timeframe === '30D' ? PROJECT_GROWTH_30D : PROJECT_GROWTH_90D;
+  const projectData: ProjectGrowthDataPoint[] = useMemo(() => {
+    const periods = timeframe === '7D' ? 7 : timeframe === '30D' ? 10 : 6;
+    const stepDays = timeframe === '7D' ? 1 : timeframe === '30D' ? 3 : 15;
+    const now = new Date();
+    return Array.from({ length: periods }, (_, index) => {
+      const periodEnd = new Date(now);
+      periodEnd.setHours(23, 59, 59, 999);
+      periodEnd.setDate(now.getDate() - ((periods - 1 - index) * stepDays));
+      const periodStart = new Date(periodEnd);
+      periodStart.setHours(0, 0, 0, 0);
+      periodStart.setDate(periodEnd.getDate() - stepDays + 1);
+      const created = projects.filter(project => new Date(project.created_at) <= periodEnd);
+      const createdThisPeriod = projects.filter(project => {
+        const createdAt = new Date(project.created_at);
+        return createdAt >= periodStart && createdAt <= periodEnd;
+      });
+      const countType = (type: string) => created.filter(project => project.project_type === type).length;
+      return {
+        date: timeframe === '7D' ? periodEnd.toLocaleDateString(undefined, { weekday: 'short' }) : periodEnd.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+        activeProjects: created.length,
+        newProjects: createdThisPeriod.length,
+        deployments: created.filter(project => project.status === 'Live').length,
+        websites: countType('website'),
+        fullstack: created.filter(project => !['website', 'mobile'].includes(project.project_type)).length,
+        mobile: countType('mobile')
+      };
+    });
+  }, [projects, timeframe]);
 
   // Select API usage data based on timeframe
   const apiData: ApiUsageDataPoint[] = 

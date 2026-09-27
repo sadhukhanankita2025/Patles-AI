@@ -6,6 +6,8 @@ import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 import { githubRouter } from './server/routes/githubRoutes.js';
 import { projectRouter } from './server/routes/projectRoutes.js';
+import { authRouter } from './server/routes/authRoutes.js';
+import { authService } from './server/services/authService.js';
 import { projectStore } from './server/db/projectStore.js';
 
 dotenv.config();
@@ -14,10 +16,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 async function startServer() {
+  try {
+    await authService.initialize();
+  } catch (err) {
+    console.warn('⚠️ authService initialization warning:', err);
+  }
+
   const app = express();
   const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '10mb' }));
+  app.use('/api/auth', authRouter);
   app.use('/api/github', githubRouter);
   app.use('/api/projects', projectRouter);
 
@@ -187,7 +196,7 @@ Synthesize complete architecture, system nodes, frontend code, backend endpoints
       // Always create a persistent project record in projectStore
       const projectId = `proj_${(synthesized.projectName || 'project').toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now().toString(36)}`;
       try {
-        await projectStore.createProject({
+        await projectStore.saveProject({
           id: projectId,
           user_id: 'usr_developer',
           name: synthesized.projectName || 'Generated App',
@@ -262,17 +271,7 @@ Synthesize complete architecture, system nodes, frontend code, backend endpoints
         ];
 
         for (const file of filesToPersist) {
-          await projectStore.saveFile({
-            id: `file_${projectId}_${file.fileName}`,
-            project_id: projectId,
-            path: file.path,
-            file_name: file.fileName,
-            language: file.language,
-            size: file.content.length,
-            content: file.content,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          });
+          await projectStore.saveFile(projectId, file.path, file.content);
         }
       } catch (storeErr) {
         console.warn('Could not persist project into projectStore:', storeErr);

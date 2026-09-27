@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  ANALYTICS_METRICS, 
-  RECENT_PROJECTS, 
   RECENT_ACTIVITIES, 
   AI_TIPS 
 } from '../data/mockData';
@@ -12,6 +10,9 @@ import { MetricsDashboard } from '../components/MetricsDashboard';
 import { Modal } from '../components/Modal';
 import { Button } from '../components/Button';
 import { ProjectRecord, ActivityItem, PageView } from '../types';
+import { useProject } from '../context/ProjectContext';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, 
   Plus, 
@@ -29,7 +30,10 @@ import {
   Layers,
   Search,
   CheckCircle2,
-  Clock
+  Clock,
+  LogOut,
+  KeyRound,
+  User
 } from 'lucide-react';
 
 interface DashboardPageProps {
@@ -41,6 +45,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   onNavigate,
   onOpenNewProject
 }) => {
+  const { projects, isLoadingProjects } = useProject();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
   const [selectedProject, setSelectedProject] = useState<ProjectRecord | null>(null);
   const [selectedActivity, setSelectedActivity] = useState<ActivityItem | null>(null);
   const [projectFilter, setProjectFilter] = useState<string>('all');
@@ -48,6 +60,26 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
   const [searchFilter, setSearchFilter] = useState('');
 
   const currentTip = AI_TIPS[tipIndex];
+
+  const projectRecords: ProjectRecord[] = projects.map((project) => ({
+    id: project.id,
+    name: project.name,
+    type: project.project_type === 'mobile' ? 'mobile' : project.project_type === 'website' ? 'website' : 'fullstack',
+    modelUsed: project.backend || 'Patles AI',
+    status: project.status as ProjectRecord['status'],
+    updatedAt: new Date(project.updated_at).toLocaleDateString(),
+    stars: project.stars,
+    branch: 'main',
+    description: project.description,
+    linesOfCode: project.features.length * 100
+  }));
+
+  const dashboardMetrics = [
+    { id: 'saved', title: 'Saved Projects', value: String(projects.length), change: `${projects.filter(p => p.status === 'Ready').length} ready`, changeType: 'positive' as const, timeframe: 'your account', iconName: 'Boxes', sparkline: [0, ...Array.from({ length: 7 }, (_, index) => projects.filter(p => new Date(p.created_at) <= new Date(Date.now() - (6 - index) * 86400000)).length)] },
+    { id: 'live', title: 'Live Projects', value: String(projects.filter(p => p.status === 'Live').length), change: 'deployment status', changeType: 'positive' as const, timeframe: 'your account', iconName: 'GitBranch', sparkline: [0, 0, 0, 0, 0, 0, 0, projects.filter(p => p.status === 'Live').length] },
+    { id: 'building', title: 'Projects Building', value: String(projects.filter(p => p.status === 'Building').length), change: 'in progress', changeType: 'neutral' as const, timeframe: 'your account', iconName: 'CheckCircle2', sparkline: [0, 0, 0, 0, 0, 0, 0, projects.filter(p => p.status === 'Building').length] },
+    { id: 'types', title: 'Project Types', value: String(new Set(projects.map(p => p.project_type)).size), change: 'architectures used', changeType: 'positive' as const, timeframe: 'your account', iconName: 'ShieldCheck', sparkline: [0, 0, 0, 0, 0, 0, 0, new Set(projects.map(p => p.project_type)).size] }
+  ];
 
   const handleNextTip = () => {
     setTipIndex((prev) => (prev + 1) % AI_TIPS.length);
@@ -57,7 +89,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
     setTipIndex((prev) => (prev - 1 + AI_TIPS.length) % AI_TIPS.length);
   };
 
-  const filteredProjects = RECENT_PROJECTS.filter((p) => {
+  const filteredProjects = projectRecords.filter((p) => {
     const matchesCategory = projectFilter === 'all' || p.type === projectFilter;
     const matchesSearch = p.name.toLowerCase().includes(searchFilter.toLowerCase()) || 
                           p.description.toLowerCase().includes(searchFilter.toLowerCase());
@@ -96,17 +128,27 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900/80 border border-slate-700/60 text-xs font-mono text-cyan-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>IBM Granite 3.0 Model Cluster Online</span>
+              <span>PostgreSQL Authenticated Session</span>
             </div>
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
-              Welcome back, Developer Alex 👋
+              Welcome back, {user?.name || user?.email?.split('@')[0] || 'Developer'} 👋
             </h1>
             <p className="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Your autonomous AI development platform is operating at peak performance. 4 repositories are ready for deployment and 0 critical vulnerabilities were found in your last PR.
+              {projects.length === 0 ? 'Create your first project to start tracking its build status and architecture.' : `${projects.length} saved project${projects.length === 1 ? '' : 's'} are synced to this dashboard.`}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-3">
+            <Button
+              id="dashboard-logout-btn"
+              variant="outline"
+              size="md"
+              onClick={handleLogout}
+              leftIcon={<LogOut className="w-4 h-4 text-rose-400" />}
+              className="text-xs text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 border border-rose-500/30 cursor-pointer"
+            >
+              Sign Out
+            </Button>
             <Button
               variant="outline"
               size="md"
@@ -143,7 +185,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {ANALYTICS_METRICS.map((metric) => (
+          {dashboardMetrics.map((metric) => (
             <AnalyticsCard key={metric.id} metric={metric} />
           ))}
         </div>
@@ -225,14 +267,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
       </motion.div>
 
       {/* 4. Live Metrics & Telemetry Dashboard (Active Project Growth & API Usage Trends via Recharts) */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <MetricsDashboard />
-      </motion.div>
+      <MetricsDashboard projects={projects} />
 
       {/* 5. Split Section: Recent Projects Table & AI Activity Timeline + Tips */}
       <motion.div 
@@ -354,7 +389,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({
 
               {filteredProjects.length === 0 && (
                 <div className="py-12 text-center text-xs text-slate-400">
-                  No projects match your filter.
+                  {isLoadingProjects ? 'Loading your projects…' : 'No saved projects match your filter.'}
                 </div>
               )}
             </div>

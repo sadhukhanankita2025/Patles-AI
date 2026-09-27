@@ -45,7 +45,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const refreshProjects = useCallback(async () => {
     setIsLoadingProjects(true);
     try {
-      const res = await fetch('/api/projects');
+      const res = await fetch('/api/projects', { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setProjects(data.projects || []);
@@ -68,7 +68,7 @@ export const ProjectProvider: React.FC<{ children: React.ReactNode }> = ({ child
   const refreshActiveProject = useCallback(async () => {
     if (!activeProjectId) return;
     try {
-      const res = await fetch(`/api/projects/${activeProjectId}`);
+      const res = await fetch(`/api/projects/${activeProjectId}`, { credentials: 'include' });
       if (res.ok) {
         const data = await res.json();
         setActiveProject(data.project);
