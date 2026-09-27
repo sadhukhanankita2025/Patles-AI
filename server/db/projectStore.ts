@@ -1145,6 +1145,21 @@ npm run dev
         timestamp: '2026-02-10T12:00:00Z'
       }
     ]);
+
+    // Seed default baseline snapshot
+    this.snapshots.set(defaultProjectId, [
+      {
+        id: `snap_${defaultProjectId}_v1`,
+        project_id: defaultProjectId,
+        name: 'v1.0 - Full-Stack Production Baseline',
+        description: 'Initial clean synthesis with React 19 views, Express appointment controllers, and PostgreSQL schema.',
+        files: defaultFiles.map(f => ({ ...f })),
+        files_count: defaultFiles.length,
+        prompt: healthcareProject.prompt,
+        architecture_summary: 'Layered Client-Server Architecture (React + Express + PostgreSQL)',
+        created_at: '2026-02-10T12:05:00Z'
+      }
+    ]);
   }
 
   // --- Projects CRUD ---
@@ -1297,6 +1312,11 @@ npm run dev
     return this.snapshots.get(projectId) || [];
   }
 
+  async getSnapshotById(projectId: string, snapshotId: string): Promise<ProjectSnapshotRow | null> {
+    const list = this.snapshots.get(projectId) || [];
+    return list.find(s => s.id === snapshotId) || null;
+  }
+
   async createSnapshot(projectId: string, name?: string, description?: string): Promise<ProjectSnapshotRow> {
     const project = this.projects.get(projectId);
     const currentFiles = this.files.get(projectId) || [];
@@ -1329,16 +1349,36 @@ npm run dev
     return snapshot;
   }
 
-  async restoreSnapshot(projectId: string, snapshotId: string): Promise<boolean> {
+  async restoreSnapshot(projectId: string, snapshotId: string): Promise<{ success: boolean; snapshot?: ProjectSnapshotRow; files?: ProjectFileRow[] }> {
     const list = this.snapshots.get(projectId) || [];
     const target = list.find(s => s.id === snapshotId);
-    if (!target) return false;
+    if (!target) return { success: false };
 
     // Restore files deep copy
     const restoredFiles: ProjectFileRow[] = target.files.map(f => ({ ...f }));
     this.files.set(projectId, restoredFiles);
 
+    // Update project metadata timestamp
+    const project = this.projects.get(projectId);
+    if (project) {
+      project.updated_at = new Date().toISOString();
+      if (target.prompt) {
+        project.prompt = target.prompt;
+      }
+    }
+
     this.logActivity(projectId, 'Snapshot restored', target.name, `Restored ${restoredFiles.length} files`);
+    return { success: true, snapshot: target, files: restoredFiles };
+  }
+
+  async deleteSnapshot(projectId: string, snapshotId: string): Promise<boolean> {
+    const list = this.snapshots.get(projectId) || [];
+    const index = list.findIndex(s => s.id === snapshotId);
+    if (index === -1) return false;
+
+    const [removed] = list.splice(index, 1);
+    this.snapshots.set(projectId, list);
+    this.logActivity(projectId, 'Snapshot deleted', removed.name);
     return true;
   }
 

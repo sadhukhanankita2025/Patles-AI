@@ -33,6 +33,17 @@ projectRouter.post('/generate', async (req: Request, res: Response) => {
       userId
     });
 
+    // Auto-save initial baseline snapshot for instant rollback capability
+    try {
+      await projectStore.createSnapshot(
+        result.project.id,
+        'v1.0 - Initial AI Synthesis',
+        `Automatic baseline checkpoint containing ${result.files.length} production files.`
+      );
+    } catch (snapErr) {
+      console.warn('Could not auto-create initial snapshot:', snapErr);
+    }
+
     res.status(201).json({
       success: true,
       project: result.project,
@@ -770,7 +781,11 @@ projectRouter.post('/:projectId/snapshot', async (req: Request, res: Response) =
     if (!project) return res.status(404).json({ error: 'Project not found.' });
 
     const snapshot = await projectStore.createSnapshot(project.id, name, description);
-    res.status(201).json({ success: true, snapshot });
+    res.status(201).json({ 
+      success: true, 
+      snapshot, 
+      message: `Snapshot "${snapshot.name}" saved with ${snapshot.files_count} files.` 
+    });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -783,7 +798,33 @@ projectRouter.post('/:projectId/snapshot', async (req: Request, res: Response) =
 projectRouter.get('/:projectId/snapshots', async (req: Request, res: Response) => {
   try {
     const snapshots = await projectStore.getSnapshots(req.params.projectId);
-    res.json({ success: true, snapshots });
+    const sanitized = snapshots.map(s => ({
+      id: s.id,
+      project_id: s.project_id,
+      name: s.name,
+      description: s.description,
+      files_count: s.files_count || (s.files ? s.files.length : 0),
+      prompt: s.prompt,
+      architecture_summary: s.architecture_summary,
+      created_at: s.created_at
+    }));
+    res.json({ success: true, snapshots: sanitized });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * GET /api/projects/:projectId/snapshots/:snapshotId
+ * Retrieve single snapshot details with file list
+ */
+projectRouter.get('/:projectId/snapshots/:snapshotId', async (req: Request, res: Response) => {
+  try {
+    const snapshot = await projectStore.getSnapshotById(req.params.projectId, req.params.snapshotId);
+    if (!snapshot) {
+      return res.status(404).json({ error: 'Snapshot not found.' });
+    }
+    res.json({ success: true, snapshot });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -801,13 +842,46 @@ projectRouter.post('/:projectId/restore', async (req: Request, res: Response) =>
     const project = await projectStore.getProjectById(req.params.projectId);
     if (!project) return res.status(404).json({ error: 'Project not found.' });
 
-    const success = await projectStore.restoreSnapshot(project.id, snapshotId);
-    if (!success) {
+    const result = await projectStore.restoreSnapshot(project.id, snapshotId);
+    if (!result.success || !result.snapshot) {
       return res.status(404).json({ error: 'Snapshot not found.' });
     }
 
     const files = await projectStore.getFiles(project.id);
-    res.json({ success: true, message: 'Snapshot restored successfully.', filesCount: files.length });
+    res.json({ 
+      success: true, 
+      message: `Project restored to checkpoint "${result.snapshot.name}".`,
+      snapshot: {
+        id: result.snapshot.id,
+        name: result.snapshot.name,
+        created_at: result.snapshot.created_at
+      },
+      filesCount: files.length,
+      files: files.map(f => ({
+        id: f.id,
+        path: f.path,
+        fileName: f.file_name,
+        language: f.language,
+        size: f.size,
+        updatedAt: f.updated_at
+      }))
+    });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * DELETE /api/projects/:projectId/snapshots/:snapshotId
+ * Delete a saved snapshot
+ */
+projectRouter.delete('/:projectId/snapshots/:snapshotId', async (req: Request, res: Response) => {
+  try {
+    const success = await projectStore.deleteSnapshot(req.params.projectId, req.params.snapshotId);
+    if (!success) {
+      return res.status(404).json({ error: 'Snapshot not found.' });
+    }
+    res.json({ success: true, message: 'Snapshot deleted successfully.' });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

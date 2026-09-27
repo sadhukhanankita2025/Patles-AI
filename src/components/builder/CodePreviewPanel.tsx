@@ -26,6 +26,7 @@ interface CodePreviewPanelProps {
   projectName?: string;
   onSaveFile?: (path: string, content: string) => Promise<void>;
   openInWorkspace?: () => void;
+  reloadTrigger?: number;
 }
 
 export const CodePreviewPanel: React.FC<CodePreviewPanelProps> = ({
@@ -35,7 +36,8 @@ export const CodePreviewPanel: React.FC<CodePreviewPanelProps> = ({
   onSelectFile,
   projectName = 'HealthcareConnect',
   onSaveFile,
-  openInWorkspace
+  openInWorkspace,
+  reloadTrigger
 }) => {
   const [openTabs, setOpenTabs] = useState<string[]>(['src/pages/Login.jsx']);
   const [fileContent, setFileContent] = useState<string>('');
@@ -171,7 +173,7 @@ export const Login = ({ onLoginSuccess }) => {
       });
 
     return () => { active = false; };
-  }, [selectedFilePath, projectName, projectId]);
+  }, [selectedFilePath, projectName, projectId, reloadTrigger]);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(fileContent);

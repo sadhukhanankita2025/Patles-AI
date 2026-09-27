@@ -78,6 +78,7 @@ export const BuilderPage: React.FC<BuilderPageProps> = ({
   const [currentProject, setCurrentProject] = useState<any>(null);
   const [projectFiles, setProjectFiles] = useState<ProjectTreeFile[]>([]);
   const [snapshots, setSnapshots] = useState<SnapshotItem[]>([]);
+  const [reloadTrigger, setReloadTrigger] = useState<number>(0);
   const [isDarkTheme, setIsDarkTheme] = useState<boolean>(true);
   const [statusMessage, setStatusMessage] = useState<string>('Ready');
 
@@ -127,7 +128,21 @@ export const BuilderPage: React.FC<BuilderPageProps> = ({
 
       if (filesRes.ok) {
         const data = await filesRes.json();
-        setProjectFiles(data.files || []);
+        const incomingFiles = (data.files || []).map((f: any) => ({
+          id: f.id,
+          path: f.path,
+          fileName: f.fileName || f.file_name,
+          language: f.language,
+          size: f.size
+        }));
+        setProjectFiles(incomingFiles);
+
+        // Ensure selectedFilePath points to an existing file in incomingFiles
+        setSelectedFilePath(prev => {
+          if (incomingFiles.some((f: any) => f.path === prev)) return prev;
+          const fallback = incomingFiles.find((f: any) => f.path.includes('Login') || f.path.includes('App') || f.path.includes('Dashboard')) || incomingFiles[0];
+          return fallback ? fallback.path : prev;
+        });
       }
 
       if (snapRes.ok) {
@@ -270,14 +285,19 @@ export const BuilderPage: React.FC<BuilderPageProps> = ({
   };
 
   // Snapshot handlers
-  const handleSaveSnapshot = async (name: string) => {
+  const handleSaveSnapshot = async (name: string, description?: string) => {
     const projId = activeProjectId || 'proj_healthcare_connect';
     const res = await fetch(`/api/projects/${projId}/snapshot`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name })
+      body: JSON.stringify({ name, description })
     });
-    if (!res.ok) throw new Error('Could not create snapshot.');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Could not create snapshot.');
+    }
+    const data = await res.json();
+    setStatusMessage(`Saved checkpoint "${name}"`);
     await loadProjectData(projId);
   };
 
@@ -288,8 +308,27 @@ export const BuilderPage: React.FC<BuilderPageProps> = ({
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ snapshotId })
     });
-    if (!res.ok) throw new Error('Could not restore snapshot.');
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Could not restore snapshot.');
+    }
+    const data = await res.json();
     await loadProjectData(projId);
+    setReloadTrigger(prev => prev + 1);
+    setStatusMessage(`Restored project code to checkpoint "${data.snapshot?.name || 'Checkpoint'}"`);
+  };
+
+  const handleDeleteSnapshot = async (snapshotId: string) => {
+    const projId = activeProjectId || 'proj_healthcare_connect';
+    const res = await fetch(`/api/projects/${projId}/snapshots/${snapshotId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Could not delete snapshot.');
+    }
+    await loadProjectData(projId);
+    setStatusMessage('Snapshot removed');
   };
 
   // Export handlers
@@ -552,6 +591,7 @@ export const BuilderPage: React.FC<BuilderPageProps> = ({
             snapshots={snapshots}
             onSaveSnapshot={handleSaveSnapshot}
             onRestoreSnapshot={handleRestoreSnapshot}
+            onDeleteSnapshot={handleDeleteSnapshot}
             onSaveFile={handleSaveFile}
             onOpenWorkspace={() => onNavigate('workspace')}
             onExportZip={handleExportZip}
@@ -559,6 +599,7 @@ export const BuilderPage: React.FC<BuilderPageProps> = ({
             onExportSql={handleExportSql}
             onExportArchitecture={handleExportArchitecture}
             onExportApiDocs={handleExportApiDocs}
+            reloadTrigger={reloadTrigger}
           />
         </div>
 

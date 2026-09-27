@@ -22,8 +22,9 @@ interface LivePreviewPanelProps {
   isGenerating: boolean;
   hasGenerated: boolean;
   snapshots: SnapshotItem[];
-  onSaveSnapshot: (name: string) => Promise<void>;
+  onSaveSnapshot: (name: string, description?: string) => Promise<void>;
   onRestoreSnapshot: (id: string) => Promise<void>;
+  onDeleteSnapshot?: (id: string) => Promise<void>;
   onSaveFile?: (path: string, content: string) => Promise<void>;
   onOpenWorkspace: () => void;
   onExportZip: () => void;
@@ -31,6 +32,7 @@ interface LivePreviewPanelProps {
   onExportSql: () => void;
   onExportArchitecture: () => void;
   onExportApiDocs: () => void;
+  reloadTrigger?: number;
 }
 
 export const LivePreviewPanel: React.FC<LivePreviewPanelProps> = ({
@@ -47,13 +49,15 @@ export const LivePreviewPanel: React.FC<LivePreviewPanelProps> = ({
   snapshots,
   onSaveSnapshot,
   onRestoreSnapshot,
+  onDeleteSnapshot,
   onSaveFile,
   onOpenWorkspace,
   onExportZip,
   onExportReadme,
   onExportSql,
   onExportArchitecture,
-  onExportApiDocs
+  onExportApiDocs,
+  reloadTrigger
 }) => {
   return (
     <div className="h-full flex flex-col bg-[#020617] rounded-3xl border border-white/10 overflow-hidden shadow-2xl relative">
@@ -114,6 +118,7 @@ export const LivePreviewPanel: React.FC<LivePreviewPanelProps> = ({
                 projectName={project?.name || project?.projectName || 'HealthcareConnect'}
                 onSaveFile={onSaveFile}
                 openInWorkspace={onOpenWorkspace}
+                reloadTrigger={reloadTrigger}
               />
             </motion.div>
           )}
@@ -180,6 +185,7 @@ export const LivePreviewPanel: React.FC<LivePreviewPanelProps> = ({
                 snapshots={snapshots}
                 onSaveSnapshot={onSaveSnapshot}
                 onRestoreSnapshot={onRestoreSnapshot}
+                onDeleteSnapshot={onDeleteSnapshot}
               />
             </motion.div>
           )}
